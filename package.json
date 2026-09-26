@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -42,5 +44,10 @@
   },
   "allowScripts": {
     "msw@2.15.0": true
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }
