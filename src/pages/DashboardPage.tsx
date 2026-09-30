@@ -1,6 +1,4 @@
 import {
-  ArrowDownRight,
-  ArrowUpRight,
   Clock3,
   DollarSign,
   Package,
@@ -10,93 +8,9 @@ import {
 import { Link } from 'react-router-dom';
 import { useDashboardAnalytics } from '../hooks/useDashboardAnalytics';
 import { useOrders } from '../hooks/useOrders';
-import type { OrderStatus } from '../types';
+import { MetricCard } from '../components/dashboard/MetricCard';
+import { StatusBadge } from '../components/dashboard/StatusBadge';
 
-interface MetricCardProps {
-  title: string;
-  value: string;
-  change: string;
-  positive: boolean;
-  icon: typeof DollarSign;
-}
-
-function MetricCard({
-  title,
-  value,
-  change,
-  positive,
-  icon: Icon,
-}: MetricCardProps) {
-  return (
-    <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm font-medium text-slate-500">
-            {title}
-          </p>
-
-          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-            {value}
-          </p>
-        </div>
-
-        <div className="rounded-lg bg-slate-100 p-2.5 text-slate-700">
-          <Icon size={20} />
-        </div>
-      </div>
-
-      <div className="mt-4 flex items-center gap-1 text-sm">
-        {positive ? (
-          <ArrowUpRight
-            size={16}
-            className="text-emerald-600"
-          />
-        ) : (
-          <ArrowDownRight
-            size={16}
-            className="text-red-600"
-          />
-        )}
-
-        <span
-          className={
-            positive
-              ? 'font-medium text-emerald-600'
-              : 'font-medium text-red-600'
-          }
-        >
-          {change}
-        </span>
-
-        <span className="text-slate-400">
-          vs last period
-        </span>
-      </div>
-    </article>
-  );
-}
-
-interface OrderStatusProps {
-  status: OrderStatus;
-}
-
-function OrderStatus({ status }: OrderStatusProps) {
-  const statusStyles: Record<OrderStatus, string> = {
-    delivered: 'bg-emerald-50 text-emerald-700',
-    processing: 'bg-blue-50 text-blue-700',
-    shipped: 'bg-violet-50 text-violet-700',
-    pending: 'bg-amber-50 text-amber-700',
-    cancelled: 'bg-red-50 text-red-700',
-  };
-
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[status]}`}
-    >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </span>
-  );
-}
 
 export function DashboardPage() {
   const {
@@ -406,8 +320,7 @@ export function DashboardPage() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <OrderStatus status={order.status} />
-                    </td>
+<StatusBadge status={order.status} />                    </td>
 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-sm text-slate-500">
