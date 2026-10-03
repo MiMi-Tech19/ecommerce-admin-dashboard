@@ -7,8 +7,8 @@ import { OrdersPage } from '../pages/OrdersPage';
 import { ProductsPage } from '../pages/ProductsPage';
 import { SettingsPage } from '../pages/SettingsPage';
 
-export const router = createBrowserRouter([
-  {
+export const router = createBrowserRouter(
+  [  {
     path: '/',
     element: <AppLayout />,
     errorElement: <NotFoundPage />,
@@ -38,5 +38,9 @@ export const router = createBrowserRouter([
   {
     path: '*',
     element: <NotFoundPage />,
+   },
+  ],
+  {
+    basename: import.meta.env.BASE_URL,
   },
-]);
+);
