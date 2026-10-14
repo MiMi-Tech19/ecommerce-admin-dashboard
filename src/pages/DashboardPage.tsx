@@ -4,13 +4,12 @@ import {
   Package,
   ShoppingCart,
   TrendingUp,
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useDashboardAnalytics } from '../hooks/useDashboardAnalytics';
-import { useOrders } from '../hooks/useOrders';
-import { MetricCard } from '../components/dashboard/MetricCard';
-import { StatusBadge } from '../components/dashboard/StatusBadge';
-
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
+import { useOrders } from "../hooks/useOrders";
+import { MetricCard } from "../components/dashboard/MetricCard";
+import { StatusBadge } from "../components/dashboard/StatusBadge";
 
 export function DashboardPage() {
   const {
@@ -69,9 +68,7 @@ export function DashboardPage() {
     <section>
       {/* Dashboard Heading */}
       <div className="mb-8">
-        <p className="text-sm font-medium text-slate-500">
-          Overview
-        </p>
+        <p className="text-sm font-medium text-slate-500">Overview</p>
 
         <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Dashboard
@@ -123,9 +120,7 @@ export function DashboardPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:col-span-2">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-semibold text-slate-900">
-                Sales Overview
-              </h2>
+              <h2 className="font-semibold text-slate-900">Sales Overview</h2>
 
               <p className="mt-1 text-sm text-slate-500">
                 Revenue and orders over the last 7 days
@@ -147,15 +142,11 @@ export function DashboardPage() {
           <div className="mt-8 flex h-64 items-end gap-2 sm:gap-4">
             {analytics.salesOverTime.map((item) => {
               const maxRevenue = Math.max(
-                ...analytics.salesOverTime.map(
-                  (sale) => sale.revenue,
-                ),
+                ...analytics.salesOverTime.map((sale) => sale.revenue),
               );
 
               const height =
-                maxRevenue > 0
-                  ? (item.revenue / maxRevenue) * 100
-                  : 0;
+                maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
 
               return (
                 <div
@@ -163,7 +154,7 @@ export function DashboardPage() {
                   className="flex h-full flex-1 flex-col justify-end"
                 >
                   <div
-                    className="rounded-t-md bg-slate-900 transition-all hover:bg-slate-700"
+                    className="rounded-t-md bg-slate-900 transition-all hover:bg-slate-700 dark:!bg-blue-500 dark:hover:!bg-blue-400"
                     style={{ height: `${height}%` }}
                     title={`$${item.revenue.toLocaleString()} revenue`}
                   />
@@ -179,13 +170,9 @@ export function DashboardPage() {
 
         {/* Sales by Category */}
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="font-semibold text-slate-900">
-            Sales by Category
-          </h2>
+          <h2 className="font-semibold text-slate-900">Sales by Category</h2>
 
-          <p className="mt-1 text-sm text-slate-500">
-            Revenue distribution
-          </p>
+          <p className="mt-1 text-sm text-slate-500">Revenue distribution</p>
 
           <div className="mt-6 space-y-5">
             {analytics.salesByCategory.map((item) => {
@@ -196,9 +183,7 @@ export function DashboardPage() {
               );
 
               const width =
-                maxRevenue > 0
-                  ? (item.revenue / maxRevenue) * 100
-                  : 0;
+                maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
 
               return (
                 <div key={item.category}>
@@ -212,9 +197,9 @@ export function DashboardPage() {
                     </span>
                   </div>
 
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100 dark:!bg-slate-800">
                     <div
-                      className="h-full rounded-full bg-slate-900"
+                      className="h-full rounded-full bg-slate-900 dark:!bg-blue-500"
                       style={{ width: `${width}%` }}
                     />
                   </div>
@@ -229,9 +214,7 @@ export function DashboardPage() {
       <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-3 border-b border-slate-200 p-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-semibold text-slate-900">
-              Recent Orders
-            </h2>
+            <h2 className="font-semibold text-slate-900">Recent Orders</h2>
 
             <p className="mt-1 text-sm text-slate-500">
               Latest customer orders and their status
@@ -305,7 +288,7 @@ export function DashboardPage() {
 
                     <td className="px-6 py-4">
                       <p className="text-sm text-slate-700">
-                        {firstItem?.productName ?? 'No product'}
+                        {firstItem?.productName ?? "No product"}
                       </p>
 
                       {firstItem && (
@@ -320,14 +303,13 @@ export function DashboardPage() {
                     </td>
 
                     <td className="px-6 py-4">
-<StatusBadge status={order.status} />                    </td>
+                      <StatusBadge status={order.status} />{" "}
+                    </td>
 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1.5 text-sm text-slate-500">
                         <Clock3 size={14} />
-                        {new Date(
-                          order.createdAt,
-                        ).toLocaleDateString()}
+                        {new Date(order.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                   </tr>

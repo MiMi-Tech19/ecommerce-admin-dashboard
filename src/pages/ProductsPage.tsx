@@ -1,15 +1,12 @@
-import {
-  ChevronDown,
-  Package,
-  Plus,
-  Search,
-} from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { useProducts } from '../hooks/useProducts';
-import type { ProductStatus } from '../types';
+import { ChevronDown, Package, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useProducts } from "../hooks/useProducts";
+import type { Product, ProductStatus } from "../types";
+import { AddProductModal } from "../components/products/AddProductModal";
+import { DeleteProductDialog } from "../components/products/DeleteProductDialog";
 
-type StatusFilter = 'all' | ProductStatus;
-type CategoryFilter = 'all' | string;
+type StatusFilter = "all" | ProductStatus;
+type CategoryFilter = "all" | string;
 
 interface StatusBadgeProps {
   status: ProductStatus;
@@ -17,9 +14,9 @@ interface StatusBadgeProps {
 
 function StatusBadge({ status }: StatusBadgeProps) {
   const statusStyles: Record<ProductStatus, string> = {
-    active: 'bg-emerald-50 text-emerald-700',
-    draft: 'bg-amber-50 text-amber-700',
-    archived: 'bg-slate-100 text-slate-600',
+    active: "bg-emerald-50 text-emerald-700",
+    draft: "bg-amber-50 text-amber-700",
+    archived: "bg-slate-100 text-slate-600",
   };
 
   return (
@@ -37,45 +34,31 @@ interface StockBadgeProps {
 
 function StockBadge({ stock }: StockBadgeProps) {
   if (stock === 0) {
-    return (
-      <span className="font-medium text-red-600">
-        Out of stock
-      </span>
-    );
+    return <span className="font-medium text-red-600">Out of stock</span>;
   }
 
   if (stock <= 10) {
-    return (
-      <span className="font-medium text-amber-600">
-        {stock} left
-      </span>
-    );
+    return <span className="font-medium text-amber-600">{stock} left</span>;
   }
 
-  return (
-    <span className="text-slate-600">
-      {stock} in stock
-    </span>
-  );
+  return <span className="text-slate-600">{stock} in stock</span>;
 }
 
 export function ProductsPage() {
-  const {
-    data: products = [],
-    isLoading,
-    isError,
-  } = useProducts();
+  const { data: products = [], isLoading, isError } = useProducts();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] =
-    useState<StatusFilter>('all');
-  const [categoryFilter, setCategoryFilter] =
-    useState<CategoryFilter>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
+
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false);
 
   const categories = useMemo(() => {
-    return Array.from(
-      new Set(products.map((product) => product.category)),
-    );
+    return Array.from(new Set(products.map((product) => product.category)));
   }, [products]);
 
   const filteredProducts = useMemo(() => {
@@ -85,30 +68,17 @@ export function ProductsPage() {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         product.name.toLowerCase().includes(normalizedSearch) ||
-        product.description
-          .toLowerCase()
-          .includes(normalizedSearch);
+        product.description.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus =
-        statusFilter === 'all' ||
-        product.status === statusFilter;
+        statusFilter === "all" || product.status === statusFilter;
 
       const matchesCategory =
-        categoryFilter === 'all' ||
-        product.category === categoryFilter;
+        categoryFilter === "all" || product.category === categoryFilter;
 
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesCategory
-      );
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [
-    products,
-    searchQuery,
-    statusFilter,
-    categoryFilter,
-  ]);
+  }, [products, searchQuery, statusFilter, categoryFilter]);
 
   if (isLoading) {
     return (
@@ -144,9 +114,7 @@ export function ProductsPage() {
       {/* Page Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500">
-            Catalog
-          </p>
+          <p className="text-sm font-medium text-slate-500">Catalog</p>
 
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
             Products
@@ -159,6 +127,7 @@ export function ProductsPage() {
 
         <button
           type="button"
+          onClick={() => setIsAddProductOpen(true)}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
         >
           <Plus size={18} />
@@ -169,9 +138,7 @@ export function ProductsPage() {
       {/* Product Summary */}
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">
-            Total Products
-          </p>
+          <p className="text-sm text-slate-500">Total Products</p>
 
           <p className="mt-1 text-2xl font-bold text-slate-900">
             {products.length}
@@ -179,30 +146,18 @@ export function ProductsPage() {
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">
-            Active Products
-          </p>
+          <p className="text-sm text-slate-500">Active Products</p>
 
           <p className="mt-1 text-2xl font-bold text-slate-900">
-            {
-              products.filter(
-                (product) => product.status === 'active',
-              ).length
-            }
+            {products.filter((product) => product.status === "active").length}
           </p>
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">
-            Low / Out of Stock
-          </p>
+          <p className="text-sm text-slate-500">Low / Out of Stock</p>
 
           <p className="mt-1 text-2xl font-bold text-slate-900">
-            {
-              products.filter(
-                (product) => product.stock <= 10,
-              ).length
-            }
+            {products.filter((product) => product.stock <= 10).length}
           </p>
         </div>
       </div>
@@ -220,9 +175,7 @@ export function ProductsPage() {
             <input
               type="search"
               value={searchQuery}
-              onChange={(event) =>
-                setSearchQuery(event.target.value)
-              }
+              onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search products..."
               aria-label="Search products"
               className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200"
@@ -234,9 +187,7 @@ export function ProductsPage() {
             <select
               value={statusFilter}
               onChange={(event) =>
-                setStatusFilter(
-                  event.target.value as StatusFilter,
-                )
+                setStatusFilter(event.target.value as StatusFilter)
               }
               aria-label="Filter products by status"
               className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-44"
@@ -257,9 +208,7 @@ export function ProductsPage() {
           <div className="relative">
             <select
               value={categoryFilter}
-              onChange={(event) =>
-                setCategoryFilter(event.target.value)
-              }
+              onChange={(event) => setCategoryFilter(event.target.value)}
               aria-label="Filter products by category"
               className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-48"
             >
@@ -284,28 +233,19 @@ export function ProductsPage() {
       <div className="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-200 p-6">
           <div>
-            <h2 className="font-semibold text-slate-900">
-              Product Catalog
-            </h2>
+            <h2 className="font-semibold text-slate-900">Product Catalog</h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Showing {filteredProducts.length} of{' '}
-              {products.length} products
+              Showing {filteredProducts.length} of {products.length} products
             </p>
           </div>
 
-          <Package
-            size={20}
-            className="text-slate-400"
-          />
+          <Package size={20} className="text-slate-400" />
         </div>
 
         {filteredProducts.length === 0 ? (
           <div className="p-10 text-center">
-            <Package
-              size={32}
-              className="mx-auto text-slate-300"
-            />
+            <Package size={32} className="mx-auto text-slate-300" />
 
             <h3 className="mt-3 font-medium text-slate-900">
               No products found
@@ -381,12 +321,23 @@ export function ProductsPage() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        className="text-sm font-medium text-slate-600 hover:text-slate-900"
-                      >
-                        View
-                      </button>
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setEditingProduct(product)}
+                          className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setDeletingProduct(product)}
+                          className="text-sm font-medium text-red-600 hover:text-red-700"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -395,6 +346,23 @@ export function ProductsPage() {
           </div>
         )}
       </div>
+      {isAddProductOpen && (
+        <AddProductModal onClose={() => setIsAddProductOpen(false)} />
+      )}
+
+      {editingProduct && (
+        <AddProductModal
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+        />
+      )}
+
+      {deletingProduct && (
+        <DeleteProductDialog
+          product={deletingProduct}
+          onClose={() => setDeletingProduct(null)}
+        />
+      )}
     </section>
   );
 }
