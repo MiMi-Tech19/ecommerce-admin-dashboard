@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import type { OrderStatus } from "../types";
 import { useOrders } from "../hooks/useOrders";
+import { useUpdateOrderStatus } from "../hooks/useUpdateOrderStatus";
 
 const statusOptions: Array<"all" | OrderStatus> = [
   "all",
@@ -41,7 +42,7 @@ function formatDate(date: string): string {
 
 export function OrdersPage() {
   const { data: orders = [], isLoading, isError } = useOrders();
-
+  const updateOrderStatus = useUpdateOrderStatus();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
 
@@ -189,6 +190,12 @@ export function OrdersPage() {
           </div>
         )}
 
+        {updateOrderStatus.isError && (
+          <p role="alert" className="px-5 py-3 text-sm text-red-600">
+            Unable to update order status. Please try again.
+          </p>
+        )}
+
         {!isLoading && !isError && filteredOrders.length === 0 && (
           <div className="p-8 text-center text-sm text-slate-500">
             No orders match your search or filter.
@@ -249,13 +256,33 @@ export function OrdersPage() {
                     </td>
 
                     <td className="px-5 py-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${getStatusClasses(
+                      <select
+                        aria-label={`Update status for order ${order.id}`}
+                        value={order.status}
+                        disabled={
+                          updateOrderStatus.isPending &&
+                          updateOrderStatus.variables?.id === order.id
+                        }
+                        onChange={(event) => {
+                          const status = event.target.value as OrderStatus;
+
+                          updateOrderStatus.mutate({
+                            id: order.id,
+                            status,
+                          });
+                        }}
+                        className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-wait disabled:opacity-60 ${getStatusClasses(
                           order.status,
                         )}`}
                       >
-                        {formatStatus(order.status)}
-                      </span>
+                        {statusOptions
+                          .filter((status) => status !== "all")
+                          .map((status) => (
+                            <option key={status} value={status}>
+                              {formatStatus(status)}
+                            </option>
+                          ))}
+                      </select>
                     </td>
 
                     <td className="px-5 py-4 text-slate-600">

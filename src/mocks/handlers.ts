@@ -1,10 +1,11 @@
 import { http, HttpResponse } from "msw";
-import type { Product } from "../types";
+import type { Order, OrderStatus, Product } from "../types";
 import { dashboardAnalytics } from "./data/analytics";
 import { orders } from "./data/orders";
 import { products } from "./data/products";
 
 const PRODUCTS_STORAGE_KEY = "shopadmin-products";
+const currentOrders: Order[] = orders.map((order) => ({ ...order }));
 
 function isProduct(value: unknown): value is Product {
   if (typeof value !== "object" || value === null) {
@@ -231,7 +232,63 @@ export const handlers = [
     return HttpResponse.json(dashboardAnalytics);
   }),
 
-  http.get("/api/orders", () => {
-    return HttpResponse.json(orders);
-  }),
-];
+ http.get("/api/orders", () => {
+  return HttpResponse.json(currentOrders);
+}),
+
+http.patch("/api/orders/:id/status", async ({ params, request }) => {
+  const id = params.id;
+
+  if (typeof id !== "string") {
+    return HttpResponse.json(
+      { message: "Invalid order ID" },
+      { status: 400 },
+    );
+  }
+
+  const orderIndex = currentOrders.findIndex((order) => order.id === id);
+
+  if (orderIndex === -1) {
+    return HttpResponse.json(
+      { message: "Order not found" },
+      { status: 404 },
+    );
+  }
+
+  const body: unknown = await request.json();
+
+  if (
+    typeof body !== "object" ||
+    body === null ||
+    !("status" in body) ||
+    typeof body.status !== "string" ||
+    !(
+      ["pending", "processing", "shipped", "delivered", "cancelled"] as const
+    ).includes(body.status as OrderStatus)
+  ) {
+    return HttpResponse.json(
+      { message: "Invalid order status" },
+      { status: 400 },
+    );
+  }
+
+  const existingOrder = currentOrders[orderIndex];
+
+  if (!existingOrder) {
+    return HttpResponse.json(
+      { message: "Order not found" },
+      { status: 404 },
+    );
+  }
+
+  const updatedOrder: Order = {
+    ...existingOrder,
+    status: body.status as OrderStatus,
+    updatedAt: new Date().toISOString(),
+  };
+
+  currentOrders[orderIndex] = updatedOrder;
+
+  return HttpResponse.json(updatedOrder);
+}),
+]
