@@ -48,8 +48,13 @@ type ProductSortField = "name" | "price" | "stock" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 export function ProductsPage() {
-  const { data: products = [], isLoading, isError } = useProducts();
-
+const {
+  data: products = [],
+  isLoading,
+  isError,
+  refetch,
+  isFetching,
+} = useProducts();
  
 const [searchQuery, setSearchQueryState] = useState("");
 const [statusFilter, setStatusFilterState] =
@@ -165,20 +170,32 @@ const paginatedProducts = useMemo(() => {
   }
 
   if (isError) {
-    return (
-      <section>
-        <div className="rounded-xl border border-red-200 bg-red-50 p-6">
-          <h1 className="font-semibold text-red-900">
-            Unable to load products
-          </h1>
+  return (
+    <section>
+      <div
+        role="alert"
+        className="rounded-xl border border-red-200 bg-red-50 p-6"
+      >
+        <h1 className="font-semibold text-red-900">
+          Unable to load products
+        </h1>
 
-          <p className="mt-1 text-sm text-red-700">
-            We couldn't retrieve the product list.
-          </p>
-        </div>
-      </section>
-    );
-  }
+        <p className="mt-1 text-sm text-red-700">
+          We couldn't retrieve the product list. Please try again.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => void refetch()}
+          disabled={isFetching}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isFetching ? 'Retrying...' : 'Retry'}
+        </button>
+      </div>
+    </section>
+  );
+}
 
   return (
     <section>

@@ -38,14 +38,17 @@ vi.mock('../hooks/useOrders', () => ({
   }),
 }));
 
+
 vi.mock('../hooks/useUpdateOrderStatus', () => ({
   useUpdateOrderStatus: () => ({
     mutate: updateMutateMock,
+    reset: vi.fn(),
     isPending: false,
     isError: false,
     variables: undefined,
   }),
 }));
+
 
 function renderOrdersPage() {
   const queryClient = new QueryClient({

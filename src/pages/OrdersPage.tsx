@@ -41,7 +41,13 @@ function formatDate(date: string): string {
 }
 
 export function OrdersPage() {
-  const { data: orders = [], isLoading, isError } = useOrders();
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useOrders();
   const updateOrderStatus = useUpdateOrderStatus();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
@@ -185,8 +191,19 @@ export function OrdersPage() {
         )}
 
         {isError && (
-          <div className="p-8 text-center text-sm text-red-600">
-            Unable to load orders. Please try again later.
+          <div role="alert" className="p-8 text-center">
+            <p className="text-sm text-red-600">
+              Unable to load orders. Please try again.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+              className="mt-3 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isFetching ? "Retrying..." : "Retry"}
+            </button>
           </div>
         )}
 
@@ -265,6 +282,8 @@ export function OrdersPage() {
                         }
                         onChange={(event) => {
                           const status = event.target.value as OrderStatus;
+
+                          updateOrderStatus.reset();
 
                           updateOrderStatus.mutate({
                             id: order.id,
