@@ -3,24 +3,69 @@ import { useSettings } from "../context/SettingsContext";
 
 export function SettingsPage() {
   const { settings, dispatch } = useSettings();
-  const [saved, setSaved] = useState(false);
+const [saved, setSaved] = useState(false);
+const [errors, setErrors] = useState<Record<string, string>>({});
 
   const updateField = (
-    field: keyof typeof settings,
-    value: string | boolean,
-  ) => {
-    dispatch({
-      type: "UPDATE_FIELD",
-      field,
-      value,
-    });
+  field: keyof typeof settings,
+  value: string | boolean,
+) => {
+  dispatch({
+    type: "UPDATE_FIELD",
+    field,
+    value,
+  });
 
-    setSaved(false);
-  };
+  setSaved(false);
 
-  const handleSave = () => {
-    setSaved(true);
-  };
+  setErrors((currentErrors) => {
+    if (!(field in currentErrors)) {
+      return currentErrors;
+    }
+
+    const nextErrors = { ...currentErrors };
+    delete nextErrors[field];
+
+    return nextErrors;
+  });
+};
+
+  const validateForm = (): boolean => {
+  const newErrors: Record<string, string> = {};
+
+  if (!settings.adminName.trim()) {
+    newErrors.adminName = "Admin name is required.";
+  }
+
+  if (!settings.adminEmail.trim()) {
+    newErrors.adminEmail = "Email address is required.";
+  } else if (
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.adminEmail.trim())
+  ) {
+    newErrors.adminEmail = "Enter a valid email address.";
+  }
+
+  if (!settings.storeName.trim()) {
+    newErrors.storeName = "Store name is required.";
+  }
+
+  if (!settings.storeDescription.trim()) {
+    newErrors.storeDescription = "Store description is required.";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
+const handleSave = () => {
+  setSaved(false);
+
+  if (!validateForm()) {
+    return;
+  }
+
+  setSaved(true);
+};
 
   return (
     <section className="space-y-6">
@@ -60,6 +105,11 @@ export function SettingsPage() {
                 }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {errors.adminName && (
+  <p className="mt-1 text-sm text-red-600" role="alert">
+    {errors.adminName}
+  </p>
+)}
             </div>
 
             <div>
@@ -79,6 +129,11 @@ export function SettingsPage() {
                 }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {errors.adminEmail && (
+  <p className="mt-1 text-sm text-red-600" role="alert">
+    {errors.adminEmail}
+  </p>
+)}
             </div>
           </div>
         </div>
@@ -112,6 +167,11 @@ export function SettingsPage() {
                 }
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {errors.storeName && (
+  <p className="mt-1 text-sm text-red-600" role="alert">
+    {errors.storeName}
+  </p>
+)}
             </div>
 
             <div>
@@ -131,6 +191,11 @@ export function SettingsPage() {
                 rows={4}
                 className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
+              {errors.storeDescription && (
+  <p className="mt-1 text-sm text-red-600" role="alert">
+    {errors.storeDescription}
+  </p>
+)}
             </div>
           </div>
         </div>
