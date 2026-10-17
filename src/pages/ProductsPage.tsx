@@ -44,14 +44,42 @@ function StockBadge({ stock }: StockBadgeProps) {
   return <span className="text-slate-600">{stock} in stock</span>;
 }
 
+type ProductSortField = "name" | "price" | "stock" | "createdAt";
+type SortDirection = "asc" | "desc";
+
 export function ProductsPage() {
   const { data: products = [], isLoading, isError } = useProducts();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>("all");
+ 
+const [searchQuery, setSearchQueryState] = useState("");
+const [statusFilter, setStatusFilterState] =
+  useState<StatusFilter>("all");
+const [categoryFilter, setCategoryFilterState] =
+  useState<CategoryFilter>("all");
 
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+function setSearchQuery(value: string) {
+  setSearchQueryState(value);
+  setCurrentPage(1);
+}
+
+function setStatusFilter(value: StatusFilter) {
+  setStatusFilterState(value);
+  setCurrentPage(1);
+}
+
+function setCategoryFilter(value: CategoryFilter) {
+  setCategoryFilterState(value);
+  setCurrentPage(1);
+}
+
+
+  const [sortField, setSortField] = useState<ProductSortField>("name");
+const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+const [currentPage, setCurrentPage] = useState(1);
+const [pageSize, setPageSize] = useState(5);
+
+const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
@@ -61,24 +89,67 @@ export function ProductsPage() {
     return Array.from(new Set(products.map((product) => product.category)));
   }, [products]);
 
-  const filteredProducts = useMemo(() => {
-    const normalizedSearch = searchQuery.toLowerCase().trim();
+  
+const filteredProducts = useMemo(() => {
+  const normalizedSearch = searchQuery.toLowerCase().trim();
 
-    return products.filter((product) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        product.name.toLowerCase().includes(normalizedSearch) ||
-        product.description.toLowerCase().includes(normalizedSearch);
+  const filtered = products.filter((product) => {
+    const matchesSearch =
+      normalizedSearch.length === 0 ||
+      product.name.toLowerCase().includes(normalizedSearch) ||
+      product.description.toLowerCase().includes(normalizedSearch);
 
-      const matchesStatus =
-        statusFilter === "all" || product.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" || product.status === statusFilter;
 
-      const matchesCategory =
-        categoryFilter === "all" || product.category === categoryFilter;
+    const matchesCategory =
+      categoryFilter === "all" || product.category === categoryFilter;
 
-      return matchesSearch && matchesStatus && matchesCategory;
-    });
-  }, [products, searchQuery, statusFilter, categoryFilter]);
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
+  return filtered.sort((a, b) => {
+    let comparison = 0;
+
+    switch (sortField) {
+      case "name":
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case "price":
+        comparison = a.price - b.price;
+        break;
+      case "stock":
+        comparison = a.stock - b.stock;
+        break;
+      case "createdAt":
+        comparison =
+          new Date(a.createdAt).getTime() -
+          new Date(b.createdAt).getTime();
+        break;
+    }
+
+    return sortDirection === "asc" ? comparison : -comparison;
+  });
+}, [
+  products,
+  searchQuery,
+  statusFilter,
+  categoryFilter,
+  sortField,
+  sortDirection,
+]);
+
+
+const totalPages = Math.ceil(filteredProducts.length / pageSize);
+
+const paginatedProducts = useMemo(() => {
+  const startIndex = (currentPage - 1) * pageSize;
+
+  return filteredProducts.slice(
+    startIndex,
+    startIndex + pageSize,
+  );
+}, [filteredProducts, currentPage, pageSize]);
 
   if (isLoading) {
     return (
@@ -226,6 +297,53 @@ export function ProductsPage() {
               className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
           </div>
+          
+{/* Sort Field */}
+<div>
+  <label
+    htmlFor="product-sort"
+    className="sr-only"
+  >
+    Sort products by
+  </label>
+  <select
+    id="product-sort"
+    value={sortField}
+    onChange={(event) =>
+      setSortField(event.target.value as ProductSortField)
+    }
+    aria-label="Sort products by"
+    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-44"
+  >
+    <option value="name">Name</option>
+    <option value="price">Price</option>
+    <option value="stock">Stock quantity</option>
+    <option value="createdAt">Date created</option>
+  </select>
+</div>
+
+{/* Sort Direction */}
+<div>
+  <label
+    htmlFor="product-sort-direction"
+    className="sr-only"
+  >
+    Sort direction
+  </label>
+  <select
+    id="product-sort-direction"
+    value={sortDirection}
+    onChange={(event) =>
+      setSortDirection(event.target.value as SortDirection)
+    }
+    aria-label="Sort direction"
+    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-40"
+  >
+    <option value="asc">Ascending</option>
+    <option value="desc">Descending</option>
+  </select>
+</div>
+
         </div>
       </div>
 
@@ -287,7 +405,7 @@ export function ProductsPage() {
               </thead>
 
               <tbody>
-                {filteredProducts.map((product) => (
+                {paginatedProducts.map((product) => (
                   <tr
                     key={product.id}
                     className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
@@ -346,6 +464,69 @@ export function ProductsPage() {
           </div>
         )}
       </div>
+      
+{filteredProducts.length > 0 && (
+  <div className="mt-4 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+    <p className="text-sm text-slate-600">
+      Showing{" "}
+      {(currentPage - 1) * pageSize + 1}–
+      {Math.min(currentPage * pageSize, filteredProducts.length)}{" "}
+      of {filteredProducts.length} products
+    </p>
+
+    <div className="flex flex-wrap items-center gap-3">
+      <label
+        htmlFor="product-page-size"
+        className="text-sm text-slate-600"
+      >
+        Rows per page
+      </label>
+
+      <select
+        id="product-page-size"
+        value={pageSize}
+        onChange={(event) => {
+          setPageSize(Number(event.target.value));
+          setCurrentPage(1);
+        }}
+        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+      >
+        <option value={5}>5</option>
+        <option value={10}>10</option>
+        <option value={20}>20</option>
+      </select>
+
+      <button
+        type="button"
+        onClick={() =>
+          setCurrentPage((page) => Math.max(1, page - 1))
+        }
+        disabled={currentPage === 1}
+        className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Previous
+      </button>
+
+      <span className="text-sm text-slate-600">
+        Page {currentPage} of {Math.max(1, totalPages)}
+      </span>
+
+      <button
+        type="button"
+        onClick={() =>
+          setCurrentPage((page) =>
+            Math.min(totalPages, page + 1),
+          )
+        }
+        disabled={currentPage >= totalPages}
+        className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
+
       {isAddProductOpen && (
         <AddProductModal onClose={() => setIsAddProductOpen(false)} />
       )}
