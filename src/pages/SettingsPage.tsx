@@ -3,69 +3,90 @@ import { useSettings } from "../context/SettingsContext";
 
 export function SettingsPage() {
   const { settings, dispatch } = useSettings();
-const [saved, setSaved] = useState(false);
-const [errors, setErrors] = useState<Record<string, string>>({});
+  const [saved, setSaved] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  function updateField<K extends keyof typeof settings>(
+    field: K,
+    value: (typeof settings)[K],
+  ) {
+    if (typeof value === "string") {
+      if (
+        field !== "adminName" &&
+        field !== "adminEmail" &&
+        field !== "storeName" &&
+        field !== "storeDescription"
+      ) {
+        return;
+      }
 
-  const updateField = (
-  field: keyof typeof settings,
-  value: string | boolean,
-) => {
-  dispatch({
-    type: "UPDATE_FIELD",
-    field,
-    value,
-  });
+      dispatch({
+        type: "UPDATE_TEXT_FIELD",
+        field,
+        value,
+      });
+    } else {
+      if (
+        field !== "emailNotifications" &&
+        field !== "lowStockNotifications" &&
+        field !== "darkMode"
+      ) {
+        return;
+      }
 
-  setSaved(false);
-
-  setErrors((currentErrors) => {
-    if (!(field in currentErrors)) {
-      return currentErrors;
+      dispatch({
+        type: "UPDATE_BOOLEAN_FIELD",
+        field,
+        value,
+      });
     }
 
-    const nextErrors = { ...currentErrors };
-    delete nextErrors[field];
+    setSaved(false);
 
-    return nextErrors;
-  });
-};
+    setErrors((currentErrors) => {
+      if (!(field in currentErrors)) {
+        return currentErrors;
+      }
+
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[field];
+      return nextErrors;
+    });
+  }
 
   const validateForm = (): boolean => {
-  const newErrors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {};
 
-  if (!settings.adminName.trim()) {
-    newErrors.adminName = "Admin name is required.";
-  }
+    if (!settings.adminName.trim()) {
+      newErrors.adminName = "Admin name is required.";
+    }
 
-  if (!settings.adminEmail.trim()) {
-    newErrors.adminEmail = "Email address is required.";
-  } else if (
-    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.adminEmail.trim())
-  ) {
-    newErrors.adminEmail = "Enter a valid email address.";
-  }
+    if (!settings.adminEmail.trim()) {
+      newErrors.adminEmail = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(settings.adminEmail.trim())) {
+      newErrors.adminEmail = "Enter a valid email address.";
+    }
 
-  if (!settings.storeName.trim()) {
-    newErrors.storeName = "Store name is required.";
-  }
+    if (!settings.storeName.trim()) {
+      newErrors.storeName = "Store name is required.";
+    }
 
-  if (!settings.storeDescription.trim()) {
-    newErrors.storeDescription = "Store description is required.";
-  }
+    if (!settings.storeDescription.trim()) {
+      newErrors.storeDescription = "Store description is required.";
+    }
 
-  setErrors(newErrors);
-  return Object.keys(newErrors).length === 0;
-};
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-const handleSave = () => {
-  setSaved(false);
+  const handleSave = () => {
+    setSaved(false);
 
-  if (!validateForm()) {
-    return;
-  }
+    if (!validateForm()) {
+      return;
+    }
 
-  setSaved(true);
-};
+    setSaved(true);
+  };
 
   return (
     <section className="space-y-6">
@@ -106,10 +127,10 @@ const handleSave = () => {
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               {errors.adminName && (
-  <p className="mt-1 text-sm text-red-600" role="alert">
-    {errors.adminName}
-  </p>
-)}
+                <p className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.adminName}
+                </p>
+              )}
             </div>
 
             <div>
@@ -130,10 +151,10 @@ const handleSave = () => {
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               {errors.adminEmail && (
-  <p className="mt-1 text-sm text-red-600" role="alert">
-    {errors.adminEmail}
-  </p>
-)}
+                <p className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.adminEmail}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -168,10 +189,10 @@ const handleSave = () => {
                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               {errors.storeName && (
-  <p className="mt-1 text-sm text-red-600" role="alert">
-    {errors.storeName}
-  </p>
-)}
+                <p className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.storeName}
+                </p>
+              )}
             </div>
 
             <div>
@@ -192,10 +213,10 @@ const handleSave = () => {
                 className="w-full resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
               {errors.storeDescription && (
-  <p className="mt-1 text-sm text-red-600" role="alert">
-    {errors.storeDescription}
-  </p>
-)}
+                <p className="mt-1 text-sm text-red-600" role="alert">
+                  {errors.storeDescription}
+                </p>
+              )}
             </div>
           </div>
         </div>
