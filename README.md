@@ -111,9 +111,23 @@ Keyboard navigation and the mobile hamburger menu have also been checked during 
 
 ## Project Links
 
-- **Live Demo:** Add your Vercel production URL after deployment.
-- **Source Code:** Add your GitHub repository URL.
-- **Screenshots:** Add screenshots of the dashboard, product management, and orders pages when available.
+- **Live Demo:** [View E-Commerce Admin Dashboard](https://ecommerce-admin-dashboard-immg2arg9-mi-mi-tech19.vercel.app/)
+- **Source Code:** [GitHub Repository](https://github.com/MiMi-Tech19/ecommerce-admin-dashboard)
+
+## Screenshots
+
+### Dashboard Overview
+
+![Dashboard Overview](screenshots/dashboard.png)
+
+### Product Management
+
+![Product Management](screenshots/products.png)
+
+### Order Management
+
+![Order Management](screenshots/orders.png)
+
 
 ## Author
 
