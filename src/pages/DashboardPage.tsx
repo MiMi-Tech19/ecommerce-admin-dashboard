@@ -229,95 +229,157 @@ export function DashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left">
-            <thead>
-              <tr className="border-b border-slate-200 bg-slate-50">
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Order
-                </th>
+        
 
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Customer
-                </th>
+{/* Mobile Order Cards */}
+<div className="divide-y divide-slate-100 md:hidden">
+  {orders.map((order) => {
+    const firstItem = order.items[0];
 
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Product
-                </th>
+    return (
+      <article key={order.id} className="space-y-3 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-xs text-slate-500">Order</p>
+            <p className="mt-1 break-all text-sm font-semibold text-slate-900">
+              {order.id}
+            </p>
+          </div>
 
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Total
-                </th>
-
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Status
-                </th>
-
-                <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Date
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {orders.map((order) => {
-                const firstItem = order.items[0];
-
-                return (
-                  <tr
-                    key={order.id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                  >
-                    <td className="px-6 py-4">
-                      <span className="text-sm font-medium text-slate-900">
-                        {order.id}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">
-                          {order.customerName}
-                        </p>
-
-                        <p className="text-xs text-slate-500">
-                          {order.customerEmail}
-                        </p>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-slate-700">
-                        {firstItem?.productName ?? "No product"}
-                      </p>
-
-                      {firstItem && (
-                        <p className="text-xs text-slate-500">
-                          Qty: {firstItem.quantity}
-                        </p>
-                      )}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                      ${order.total.toFixed(2)}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <StatusBadge status={order.status} />{" "}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                        <Clock3 size={14} />
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="shrink-0">
+            <StatusBadge status={order.status} />
+          </div>
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500">Customer</p>
+            <p className="mt-1 break-words text-sm font-medium text-slate-900">
+              {order.customerName}
+            </p>
+            <p className="break-all text-xs text-slate-500">
+              {order.customerEmail}
+            </p>
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-xs text-slate-500">Product</p>
+            <p className="mt-1 break-words text-sm text-slate-700">
+              {firstItem?.productName ?? "No product"}
+            </p>
+            {firstItem && (
+              <p className="text-xs text-slate-500">
+                Qty: {firstItem.quantity}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+          <div>
+            <p className="text-xs text-slate-500">Date</p>
+            <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-600">
+              <Clock3 size={13} />
+              {new Date(order.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs text-slate-500">Total</p>
+            <p className="mt-1 text-sm font-semibold text-slate-900">
+              ${order.total.toFixed(2)}
+            </p>
+          </div>
+        </div>
+      </article>
+    );
+  })}
+</div>
+
+{/* Desktop Orders Table */}
+<div className="hidden overflow-x-auto md:block">
+  <table className="w-full min-w-[700px] text-left">
+    <thead>
+      <tr className="border-b border-slate-200 bg-slate-50">
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Order
+        </th>
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Customer
+        </th>
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Product
+        </th>
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Total
+        </th>
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Status
+        </th>
+        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Date
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {orders.map((order) => {
+        const firstItem = order.items[0];
+
+        return (
+          <tr
+            key={order.id}
+            className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+          >
+            <td className="px-6 py-4">
+              <span className="text-sm font-medium text-slate-900">
+                {order.id}
+              </span>
+            </td>
+
+            <td className="px-6 py-4">
+              <div>
+                <p className="text-sm font-medium text-slate-900">
+                  {order.customerName}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {order.customerEmail}
+                </p>
+              </div>
+            </td>
+
+            <td className="px-6 py-4">
+              <p className="text-sm text-slate-700">
+                {firstItem?.productName ?? "No product"}
+              </p>
+              {firstItem && (
+                <p className="text-xs text-slate-500">
+                  Qty: {firstItem.quantity}
+                </p>
+              )}
+            </td>
+
+            <td className="px-6 py-4 text-sm font-medium text-slate-900">
+              ${order.total.toFixed(2)}
+            </td>
+
+            <td className="px-6 py-4">
+              <StatusBadge status={order.status} />
+            </td>
+
+            <td className="px-6 py-4">
+              <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                <Clock3 size={14} />
+                {new Date(order.createdAt).toLocaleDateString()}
+              </div>
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
       </div>
     </section>
   );

@@ -186,8 +186,7 @@ it("moves to the next page and returns to the previous page", () => {
     });
 
     expect(screen.getByText("Page 1 of 1")).toBeInTheDocument();
-    expect(screen.getByText("Alpha Shoes")).toBeInTheDocument();
-  });
+expect(screen.getAllByText("Alpha Shoes").length).toBeGreaterThan(0);  });
 
   it("shows an empty state when no products match the search", () => {
     renderProductsPage();
@@ -212,6 +211,5 @@ it("moves to the next page and returns to the previous page", () => {
     });
 
     expect(screen.getByText("Page 1 of 1")).toBeInTheDocument();
-    expect(screen.getByText("Silver Bottle")).toBeInTheDocument();
-  });
+expect(screen.getAllByText("Silver Bottle").length).toBeGreaterThan(0);  });
 });

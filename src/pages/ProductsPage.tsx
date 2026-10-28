@@ -48,43 +48,41 @@ type ProductSortField = "name" | "price" | "stock" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 export function ProductsPage() {
-const {
-  data: products = [],
-  isLoading,
-  isError,
-  refetch,
-  isFetching,
-} = useProducts();
- 
-const [searchQuery, setSearchQueryState] = useState("");
-const [statusFilter, setStatusFilterState] =
-  useState<StatusFilter>("all");
-const [categoryFilter, setCategoryFilterState] =
-  useState<CategoryFilter>("all");
+  const {
+    data: products = [],
+    isLoading,
+    isError,
+    refetch,
+    isFetching,
+  } = useProducts();
 
-function setSearchQuery(value: string) {
-  setSearchQueryState(value);
-  setCurrentPage(1);
-}
+  const [searchQuery, setSearchQueryState] = useState("");
+  const [statusFilter, setStatusFilterState] = useState<StatusFilter>("all");
+  const [categoryFilter, setCategoryFilterState] =
+    useState<CategoryFilter>("all");
 
-function setStatusFilter(value: StatusFilter) {
-  setStatusFilterState(value);
-  setCurrentPage(1);
-}
+  function setSearchQuery(value: string) {
+    setSearchQueryState(value);
+    setCurrentPage(1);
+  }
 
-function setCategoryFilter(value: CategoryFilter) {
-  setCategoryFilterState(value);
-  setCurrentPage(1);
-}
+  function setStatusFilter(value: StatusFilter) {
+    setStatusFilterState(value);
+    setCurrentPage(1);
+  }
 
+  function setCategoryFilter(value: CategoryFilter) {
+    setCategoryFilterState(value);
+    setCurrentPage(1);
+  }
 
   const [sortField, setSortField] = useState<ProductSortField>("name");
-const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
-const [currentPage, setCurrentPage] = useState(1);
-const [pageSize, setPageSize] = useState(5);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
-const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null);
 
@@ -94,67 +92,61 @@ const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     return Array.from(new Set(products.map((product) => product.category)));
   }, [products]);
 
-  
-const filteredProducts = useMemo(() => {
-  const normalizedSearch = searchQuery.toLowerCase().trim();
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = searchQuery.toLowerCase().trim();
 
-  const filtered = products.filter((product) => {
-    const matchesSearch =
-      normalizedSearch.length === 0 ||
-      product.name.toLowerCase().includes(normalizedSearch) ||
-      product.description.toLowerCase().includes(normalizedSearch);
+    const filtered = products.filter((product) => {
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        product.name.toLowerCase().includes(normalizedSearch) ||
+        product.description.toLowerCase().includes(normalizedSearch);
 
-    const matchesStatus =
-      statusFilter === "all" || product.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || product.status === statusFilter;
 
-    const matchesCategory =
-      categoryFilter === "all" || product.category === categoryFilter;
+      const matchesCategory =
+        categoryFilter === "all" || product.category === categoryFilter;
 
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+      return matchesSearch && matchesStatus && matchesCategory;
+    });
 
-  return filtered.sort((a, b) => {
-    let comparison = 0;
+    return filtered.sort((a, b) => {
+      let comparison = 0;
 
-    switch (sortField) {
-      case "name":
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case "price":
-        comparison = a.price - b.price;
-        break;
-      case "stock":
-        comparison = a.stock - b.stock;
-        break;
-      case "createdAt":
-        comparison =
-          new Date(a.createdAt).getTime() -
-          new Date(b.createdAt).getTime();
-        break;
-    }
+      switch (sortField) {
+        case "name":
+          comparison = a.name.localeCompare(b.name);
+          break;
+        case "price":
+          comparison = a.price - b.price;
+          break;
+        case "stock":
+          comparison = a.stock - b.stock;
+          break;
+        case "createdAt":
+          comparison =
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+          break;
+      }
 
-    return sortDirection === "asc" ? comparison : -comparison;
-  });
-}, [
-  products,
-  searchQuery,
-  statusFilter,
-  categoryFilter,
-  sortField,
-  sortDirection,
-]);
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [
+    products,
+    searchQuery,
+    statusFilter,
+    categoryFilter,
+    sortField,
+    sortDirection,
+  ]);
 
+  const totalPages = Math.ceil(filteredProducts.length / pageSize);
 
-const totalPages = Math.ceil(filteredProducts.length / pageSize);
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
 
-const paginatedProducts = useMemo(() => {
-  const startIndex = (currentPage - 1) * pageSize;
-
-  return filteredProducts.slice(
-    startIndex,
-    startIndex + pageSize,
-  );
-}, [filteredProducts, currentPage, pageSize]);
+    return filteredProducts.slice(startIndex, startIndex + pageSize);
+  }, [filteredProducts, currentPage, pageSize]);
 
   if (isLoading) {
     return (
@@ -170,32 +162,32 @@ const paginatedProducts = useMemo(() => {
   }
 
   if (isError) {
-  return (
-    <section>
-      <div
-        role="alert"
-        className="rounded-xl border border-red-200 bg-red-50 p-6"
-      >
-        <h1 className="font-semibold text-red-900">
-          Unable to load products
-        </h1>
-
-        <p className="mt-1 text-sm text-red-700">
-          We couldn't retrieve the product list. Please try again.
-        </p>
-
-        <button
-          type="button"
-          onClick={() => void refetch()}
-          disabled={isFetching}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+    return (
+      <section>
+        <div
+          role="alert"
+          className="rounded-xl border border-red-200 bg-red-50 p-6"
         >
-          {isFetching ? 'Retrying...' : 'Retry'}
-        </button>
-      </div>
-    </section>
-  );
-}
+          <h1 className="font-semibold text-red-900">
+            Unable to load products
+          </h1>
+
+          <p className="mt-1 text-sm text-red-700">
+            We couldn't retrieve the product list. Please try again.
+          </p>
+
+          <button
+            type="button"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+            className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isFetching ? "Retrying..." : "Retry"}
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section>
@@ -314,53 +306,46 @@ const paginatedProducts = useMemo(() => {
               className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
           </div>
-          
-{/* Sort Field */}
-<div>
-  <label
-    htmlFor="product-sort"
-    className="sr-only"
-  >
-    Sort products by
-  </label>
-  <select
-    id="product-sort"
-    value={sortField}
-    onChange={(event) =>
-      setSortField(event.target.value as ProductSortField)
-    }
-    aria-label="Sort products by"
-    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-44"
-  >
-    <option value="name">Name</option>
-    <option value="price">Price</option>
-    <option value="stock">Stock quantity</option>
-    <option value="createdAt">Date created</option>
-  </select>
-</div>
 
-{/* Sort Direction */}
-<div>
-  <label
-    htmlFor="product-sort-direction"
-    className="sr-only"
-  >
-    Sort direction
-  </label>
-  <select
-    id="product-sort-direction"
-    value={sortDirection}
-    onChange={(event) =>
-      setSortDirection(event.target.value as SortDirection)
-    }
-    aria-label="Sort direction"
-    className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-40"
-  >
-    <option value="asc">Ascending</option>
-    <option value="desc">Descending</option>
-  </select>
-</div>
+          {/* Sort Field */}
+          <div>
+            <label htmlFor="product-sort" className="sr-only">
+              Sort products by
+            </label>
+            <select
+              id="product-sort"
+              value={sortField}
+              onChange={(event) =>
+                setSortField(event.target.value as ProductSortField)
+              }
+              aria-label="Sort products by"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-44"
+            >
+              <option value="name">Name</option>
+              <option value="price">Price</option>
+              <option value="stock">Stock quantity</option>
+              <option value="createdAt">Date created</option>
+            </select>
+          </div>
 
+          {/* Sort Direction */}
+          <div>
+            <label htmlFor="product-sort-direction" className="sr-only">
+              Sort direction
+            </label>
+            <select
+              id="product-sort-direction"
+              value={sortDirection}
+              onChange={(event) =>
+                setSortDirection(event.target.value as SortDirection)
+              }
+              aria-label="Sort direction"
+              className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none focus:border-slate-400 focus:ring-2 focus:ring-slate-200 sm:w-40"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -391,158 +376,194 @@ const paginatedProducts = useMemo(() => {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[850px] text-left">
-              <thead>
-                <tr className="border-b border-slate-200 bg-slate-50">
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Product
-                  </th>
+          <>
+            {/* Mobile Product Cards */}
+            <div className="divide-y divide-slate-100 md:hidden">
+              {paginatedProducts.map((product) => (
+                <article key={product.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="break-words text-sm font-semibold text-slate-900">
+                        {product.name}
+                      </h3>
+                      <p className="mt-1 break-words text-xs text-slate-500">
+                        {product.description}
+                      </p>
+                    </div>
+                    <StatusBadge status={product.status} />
+                  </div>
 
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Category
-                  </th>
+                  <p className="text-xs text-slate-500">{product.category}</p>
 
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Price
-                  </th>
+                  <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3">
+                    <div>
+                      <p className="text-xs text-slate-500">Price</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">
+                        ${product.price.toFixed(2)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500">Inventory</p>
+                      <p className="mt-1 text-sm">
+                        <StockBadge stock={product.stock} />
+                      </p>
+                    </div>
+                  </div>
 
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Inventory
-                  </th>
+                  <div className="flex gap-4 border-t border-slate-100 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingProduct(product)}
+                      className="min-h-11 text-sm font-medium text-slate-700 hover:text-slate-900"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingProduct(product)}
+                      className="min-h-11 text-sm font-medium text-red-600 hover:text-red-700"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Status
-                  </th>
-
-                  <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {paginatedProducts.map((product) => (
-                  <tr
-                    key={product.id}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
+            {/* Desktop Product Table */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[850px] text-left">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-50">
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Product
+                    </th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Price
+                    </th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Inventory
+                    </th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedProducts.map((product) => (
+                    <tr
+                      key={product.id}
+                      className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                    >
+                      <td className="px-6 py-4">
                         <p className="font-medium text-slate-900">
                           {product.name}
                         </p>
-
                         <p className="mt-1 max-w-xs truncate text-xs text-slate-500">
                           {product.description}
                         </p>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-sm text-slate-600">
-                      {product.category}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm font-semibold text-slate-900">
-                      ${product.price.toFixed(2)}
-                    </td>
-
-                    <td className="px-6 py-4 text-sm">
-                      <StockBadge stock={product.stock} />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <StatusBadge status={product.status} />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <button
-                          type="button"
-                          onClick={() => setEditingProduct(product)}
-                          className="text-sm font-medium text-slate-600 hover:text-slate-900"
-                        >
-                          Edit
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setDeletingProduct(product)}
-                          className="text-sm font-medium text-red-600 hover:text-red-700"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        {product.category}
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                        ${product.price.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <StockBadge stock={product.stock} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={product.status} />
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                          <button
+                            type="button"
+                            onClick={() => setEditingProduct(product)}
+                            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setDeletingProduct(product)}
+                            className="text-sm font-medium text-red-600 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
-      
-{filteredProducts.length > 0 && (
-  <div className="mt-4 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
-    <p className="text-sm text-slate-600">
-      Showing{" "}
-      {(currentPage - 1) * pageSize + 1}–
-      {Math.min(currentPage * pageSize, filteredProducts.length)}{" "}
-      of {filteredProducts.length} products
-    </p>
 
-    <div className="flex flex-wrap items-center gap-3">
-      <label
-        htmlFor="product-page-size"
-        className="text-sm text-slate-600"
-      >
-        Rows per page
-      </label>
+      {filteredProducts.length > 0 && (
+        <div className="mt-4 flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-slate-600">
+            Showing {(currentPage - 1) * pageSize + 1}–
+            {Math.min(currentPage * pageSize, filteredProducts.length)} of{" "}
+            {filteredProducts.length} products
+          </p>
 
-      <select
-        id="product-page-size"
-        value={pageSize}
-        onChange={(event) => {
-          setPageSize(Number(event.target.value));
-          setCurrentPage(1);
-        }}
-        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
-      >
-        <option value={5}>5</option>
-        <option value={10}>10</option>
-        <option value={20}>20</option>
-      </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <label
+              htmlFor="product-page-size"
+              className="text-sm text-slate-600"
+            >
+              Rows per page
+            </label>
 
-      <button
-        type="button"
-        onClick={() =>
-          setCurrentPage((page) => Math.max(1, page - 1))
-        }
-        disabled={currentPage === 1}
-        className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        Previous
-      </button>
+            <select
+              id="product-page-size"
+              value={pageSize}
+              onChange={(event) => {
+                setPageSize(Number(event.target.value));
+                setCurrentPage(1);
+              }}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+              <option value={20}>20</option>
+            </select>
 
-      <span className="text-sm text-slate-600">
-        Page {currentPage} of {Math.max(1, totalPages)}
-      </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+              disabled={currentPage === 1}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
 
-      <button
-        type="button"
-        onClick={() =>
-          setCurrentPage((page) =>
-            Math.min(totalPages, page + 1),
-          )
-        }
-        disabled={currentPage >= totalPages}
-        className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        Next
-      </button>
-    </div>
-  </div>
-)}
+            <span className="text-sm text-slate-600">
+              Page {currentPage} of {Math.max(1, totalPages)}
+            </span>
+
+            <button
+              type="button"
+              onClick={() =>
+                setCurrentPage((page) => Math.min(totalPages, page + 1))
+              }
+              disabled={currentPage >= totalPages}
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {isAddProductOpen && (
         <AddProductModal onClose={() => setIsAddProductOpen(false)} />

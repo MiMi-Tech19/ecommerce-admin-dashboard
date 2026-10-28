@@ -175,10 +175,67 @@ describe('AddProductModal', () => {
           status: 'active',
           imageUrl: '',
         },
+
+        
       });
 
       expect(onCloseMock).toHaveBeenCalledOnce();
     });
   });
+
+  
+it('rejects a negative product price', async () => {
+  const user = userEvent.setup();
+  renderAddProductModal();
+
+  await user.type(screen.getByLabelText(/Product name/), 'Test Product');
+  await user.type(screen.getByLabelText(/Description/), 'Test description');
+  await user.type(screen.getByLabelText(/Category/), 'Electronics');
+  await user.type(screen.getByLabelText(/Price/), '-10');
+  await user.type(screen.getByLabelText(/Stock quantity/), '5');
+
+  await user.click(screen.getByRole('button', { name: 'Create Product' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'Price must be a valid non-negative number.',
+  );
+  expect(mutateAsyncMock).not.toHaveBeenCalled();
+});
+
+it('rejects a negative stock quantity', async () => {
+  const user = userEvent.setup();
+  renderAddProductModal();
+
+  await user.type(screen.getByLabelText(/Product name/), 'Test Product');
+  await user.type(screen.getByLabelText(/Description/), 'Test description');
+  await user.type(screen.getByLabelText(/Category/), 'Electronics');
+  await user.type(screen.getByLabelText(/Price/), '10');
+  await user.type(screen.getByLabelText(/Stock quantity/), '-2');
+
+  await user.click(screen.getByRole('button', { name: 'Create Product' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'Stock must be a whole number greater than or equal to zero.',
+  );
+  expect(mutateAsyncMock).not.toHaveBeenCalled();
+});
+
+it('rejects a fractional stock quantity', async () => {
+  const user = userEvent.setup();
+  renderAddProductModal();
+
+  await user.type(screen.getByLabelText(/Product name/), 'Test Product');
+  await user.type(screen.getByLabelText(/Description/), 'Test description');
+  await user.type(screen.getByLabelText(/Category/), 'Electronics');
+  await user.type(screen.getByLabelText(/Price/), '10');
+  await user.type(screen.getByLabelText(/Stock quantity/), '2.5');
+
+  await user.click(screen.getByRole('button', { name: 'Create Product' }));
+
+  expect(screen.getByRole('alert')).toHaveTextContent(
+    'Stock must be a whole number greater than or equal to zero.',
+  );
+  expect(mutateAsyncMock).not.toHaveBeenCalled();
+});
 
 });

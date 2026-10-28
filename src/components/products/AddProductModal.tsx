@@ -114,7 +114,7 @@ export function AddProductModal({ onClose, product }: AddProductModalProps) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} noValidate className="space-y-4">
           <div>
             <label
               htmlFor="product-name"

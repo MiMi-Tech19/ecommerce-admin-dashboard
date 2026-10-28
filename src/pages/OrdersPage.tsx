@@ -220,98 +220,171 @@ export function OrdersPage() {
         )}
 
         {!isLoading && !isError && filteredOrders.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Order
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Customer
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Items
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Total
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Status
-                  </th>
-                  <th scope="col" className="px-5 py-3 font-semibold">
-                    Date
-                  </th>
-                </tr>
-              </thead>
+          <>
+            {/* Mobile Order Cards */}
+            <div className="divide-y divide-slate-100 md:hidden">
+              {filteredOrders.map((order) => (
+                <article key={order.id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-500">Order</p>
+                      <p className="mt-1 break-all text-sm font-semibold text-slate-900">
+                        {order.id}
+                      </p>
+                    </div>
 
-              <tbody className="divide-y divide-slate-100">
-                {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-slate-50">
-                    <td className="px-5 py-4 font-medium text-slate-900">
-                      {order.id}
-                    </td>
+                    <select
+                      aria-label={`Update status for order ${order.id}`}
+                      value={order.status}
+                      disabled={
+                        updateOrderStatus.isPending &&
+                        updateOrderStatus.variables?.id === order.id
+                      }
+                      onChange={(event) => {
+                        const status = event.target.value as OrderStatus;
+                        updateOrderStatus.reset();
+                        updateOrderStatus.mutate({ id: order.id, status });
+                      }}
+                      className={`max-w-[150px] rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-wait disabled:opacity-60 ${getStatusClasses(order.status)}`}
+                    >
+                      {statusOptions
+                        .filter((status) => status !== "all")
+                        .map((status) => (
+                          <option key={status} value={status}>
+                            {formatStatus(status)}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
 
-                    <td className="px-5 py-4">
-                      <div className="font-medium text-slate-900">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-500">Customer</p>
+                      <p className="mt-1 break-words text-sm font-medium text-slate-900">
                         {order.customerName}
-                      </div>
-                      <div className="text-xs text-slate-500">
+                      </p>
+                      <p className="break-all text-xs text-slate-500">
                         {order.customerEmail}
-                      </div>
-                    </td>
+                      </p>
+                    </div>
 
-                    <td className="px-5 py-4 text-slate-600">
-                      {order.items.reduce(
-                        (total, item) => total + item.quantity,
-                        0,
-                      )}
-                    </td>
+                    <div>
+                      <p className="text-xs text-slate-500">Items</p>
+                      <p className="mt-1 text-sm text-slate-900">
+                        {order.items.reduce(
+                          (total, item) => total + item.quantity,
+                          0,
+                        )}
+                      </p>
+                    </div>
+                  </div>
 
-                    <td className="px-5 py-4 font-medium text-slate-900">
-                      ${order.total.toFixed(2)}
-                    </td>
+                  <div className="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+                    <div>
+                      <p className="text-xs text-slate-500">Date</p>
+                      <p className="mt-1 text-xs text-slate-600">
+                        {formatDate(order.createdAt)}
+                      </p>
+                    </div>
 
-                    <td className="px-5 py-4">
-                      <select
-                        aria-label={`Update status for order ${order.id}`}
-                        value={order.status}
-                        disabled={
-                          updateOrderStatus.isPending &&
-                          updateOrderStatus.variables?.id === order.id
-                        }
-                        onChange={(event) => {
-                          const status = event.target.value as OrderStatus;
+                    <div className="text-right">
+                      <p className="text-xs text-slate-500">Total</p>
+                      <p className="mt-1 text-sm font-semibold text-slate-900">
+                        ${order.total.toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-                          updateOrderStatus.reset();
-
-                          updateOrderStatus.mutate({
-                            id: order.id,
-                            status,
-                          });
-                        }}
-                        className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-wait disabled:opacity-60 ${getStatusClasses(
-                          order.status,
-                        )}`}
-                      >
-                        {statusOptions
-                          .filter((status) => status !== "all")
-                          .map((status) => (
-                            <option key={status} value={status}>
-                              {formatStatus(status)}
-                            </option>
-                          ))}
-                      </select>
-                    </td>
-
-                    <td className="px-5 py-4 text-slate-600">
-                      {formatDate(order.createdAt)}
-                    </td>
+            {/* Desktop Orders Table */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[800px] text-left text-sm">
+                <thead className="bg-slate-50 text-xs uppercase text-slate-500">
+                  <tr>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Order
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Customer
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Items
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Total
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Status
+                    </th>
+                    <th scope="col" className="px-5 py-3 font-semibold">
+                      Date
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+
+                <tbody className="divide-y divide-slate-100">
+                  {filteredOrders.map((order) => (
+                    <tr key={order.id} className="hover:bg-slate-50">
+                      <td className="px-5 py-4 font-medium text-slate-900">
+                        {order.id}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="font-medium text-slate-900">
+                          {order.customerName}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {order.customerEmail}
+                        </div>
+                      </td>
+
+                      <td className="px-5 py-4 text-slate-600">
+                        {order.items.reduce(
+                          (total, item) => total + item.quantity,
+                          0,
+                        )}
+                      </td>
+
+                      <td className="px-5 py-4 font-medium text-slate-900">
+                        ${order.total.toFixed(2)}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <select
+                          aria-label={`Update status for order ${order.id}`}
+                          value={order.status}
+                          disabled={
+                            updateOrderStatus.isPending &&
+                            updateOrderStatus.variables?.id === order.id
+                          }
+                          onChange={(event) => {
+                            const status = event.target.value as OrderStatus;
+                            updateOrderStatus.reset();
+                            updateOrderStatus.mutate({ id: order.id, status });
+                          }}
+                          className={`rounded-full border-0 px-2.5 py-1 text-xs font-medium outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-wait disabled:opacity-60 ${getStatusClasses(order.status)}`}
+                        >
+                          {statusOptions
+                            .filter((status) => status !== "all")
+                            .map((status) => (
+                              <option key={status} value={status}>
+                                {formatStatus(status)}
+                              </option>
+                            ))}
+                        </select>
+                      </td>
+
+                      <td className="px-5 py-4 text-slate-600">
+                        {formatDate(order.createdAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </section>
