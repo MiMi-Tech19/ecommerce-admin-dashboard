@@ -46,61 +46,60 @@ function PageLoading() {
   );
 }
 
-export const router = createBrowserRouter(
-  [
-    {
-      path: '/',
-      element: <AppLayout />,
-      errorElement: <NotFoundPage />,
-      children: [
-        {
-          index: true,
-          element: (
-            <Suspense fallback={<PageLoading />}>
-              <DashboardPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: 'products',
-          element: (
-            <Suspense fallback={<PageLoading />}>
-              <ProductsPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: 'orders',
-          element: (
-            <Suspense fallback={<PageLoading />}>
-              <OrdersPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: 'analytics',
-          element: (
-            <Suspense fallback={<PageLoading />}>
-              <AnalyticsPage />
-            </Suspense>
-          ),
-        },
-        {
-          path: 'settings',
-          element: (
-            <Suspense fallback={<PageLoading />}>
-              <SettingsPage />
-            </Suspense>
-          ),
-        },
-      ],
-    },
-    {
-      path: '*',
-      element: <NotFoundPage />,
-    },
-  ],
+export const routeConfig = [
   {
-    basename: import.meta.env.BASE_URL,
+    path: '/',
+    element: <AppLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <DashboardPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'products',
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <ProductsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'orders',
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <OrdersPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'analytics',
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <AnalyticsPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'settings',
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <SettingsPage />
+          </Suspense>
+        ),
+      },
+    ],
   },
-);
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
+];
+
+export const router = createBrowserRouter(routeConfig, {
+  basename: import.meta.env.BASE_URL,
+});
