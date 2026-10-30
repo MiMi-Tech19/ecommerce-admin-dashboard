@@ -1,81 +1,93 @@
 # E-Commerce Admin & Real-Time Analytics Dashboard
 
-A responsive e-commerce administration dashboard built with React, TypeScript, and Vite. The application provides an interface for monitoring store performance, managing products, and handling customer orders.
+A responsive e-commerce administration dashboard built with **React, TypeScript, and Vite**. It provides an interface for monitoring store performance, managing products, handling orders, and viewing analytics.
 
-> **Project status:** Frontend implementation with mock data. A production backend and database are not currently connected.
+## Project Status
+
+**Frontend implementation complete.**
+
+The dashboard currently uses mock data and client-side functionality. It is not connected to a production backend or database.
 
 ## Features
 
-- **Dashboard overview:** View store analytics and recent orders.
-- **Product management:** View, add, edit, and delete products.
-- **Order management:** View order details and update order statuses.
-- **Analytics:** Explore dashboard metrics using mock data.
-- **Responsive design:** Mobile-friendly layouts for dashboard, product, and order views.
-- **Form validation:** Validate product details and display helpful error messages.
-- **Client-side persistence:** Product records and settings persist through browser `localStorage` where implemented.
-- **Accessible navigation:** Keyboard-accessible controls and responsive mobile navigation.
-- **Error handling:** Improved error handling using React error boundaries.
-- **Automated testing:** Unit and component tests using Vitest and React Testing Library.
+- **Dashboard Overview:** View key store metrics, sales summaries, and recent orders.
+- **Product Management:** View, add, edit, and delete products.
+- **Order Management:** View order details and update order statuses.
+- **Analytics:** Explore sales and product performance using mock data.
+- **Responsive Design:** Optimized layouts for desktop and mobile devices.
+- **Form Validation:** Validate user input when managing products and settings.
+- **Client-Side Persistence:** Product records and settings use localStorage where implemented.
+- **Accessible Navigation:** Keyboard-friendly navigation and responsive menu controls.
+- **Error Handling:** React error boundaries help handle unexpected application errors.
+- **Automated Testing:** Unit and component tests using Vitest and React Testing Library.
 
 ## Tech Stack
 
-- **React 19** — Component-based user interface
-- **TypeScript** — Type safety
-- **Vite** — Development server and build tooling
-- **React Router 7** — Application routing
-- **TanStack Query v5** — Data-fetching and server-state utilities
-- **Tailwind CSS v4** — Styling and responsive layouts
-- **shadcn/ui with Base UI** — UI components
-- **Lucide React** — Icons
-- **Vitest** — Testing framework
-- **React Testing Library** — Component testing
-- **MSW** — API mocking for tests
-- **ESLint** — Code quality and linting
+| Technology | Purpose |
+|---|---|
+| React 19 | User interface |
+| TypeScript | Type safety |
+| Vite | Development server and build tool |
+| React Router 7 | Application routing |
+| TanStack Query v5 | Data fetching and state management |
+| Tailwind CSS v4 | Styling |
+| shadcn/ui with Base UI | UI components |
+| Lucide React | Icons |
+| Vitest | Testing |
+| React Testing Library | Component testing |
+| MSW | API mocking |
+| ESLint | Code quality and linting |
 
 ## Getting Started
 
 ### Prerequisites
 
-Install the following before running the project:
+Make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/)
-- npm, included with Node.js
-- Git, if cloning the repository
+- npm
+- [Git](https://git-scm.com/)
 
 ### Installation
 
-1. Clone the repository or open your existing project folder.
-2. Open a terminal in the project root.
-3. Install the dependencies:
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/MiMi-Tech19/ecommerce-admin-dashboard.git
+   ```
+
+2. Navigate into the project directory:
+
+   ```bash
+   cd ecommerce-admin-dashboard
+   ```
+
+3. Install dependencies:
 
    ```bash
    npm install
    ```
 
-### Run the Development Server
+4. Start the development server:
 
-```bash
-npm run dev
-```
+   ```bash
+   npm run dev
+   ```
 
-Open the local URL displayed in your terminal, usually `http://localhost:5173`.
+5. Open the local development URL displayed in your terminal (usually `http://localhost:5173`).
 
 ## Available Scripts
 
-Run these commands from the project root.
-
 | Command | Description |
 |---|---|
-| `npm run dev` | Start the development server |
-| `npm run build` | Type-check and build the production application |
-| `npm run lint` | Run ESLint checks |
-| `npm run test:run` | Run the automated test suite once |
+| `npm run dev` | Starts the development server |
+| `npm run build` | Runs TypeScript checks and creates a production build |
+| `npm run lint` | Runs ESLint |
+| `npm run test:run` | Runs the automated test suite |
 
 ## Testing and Quality Assurance
 
-The project uses Vitest and React Testing Library to test application behavior and components. MSW is available for mocking API requests in tests.
-
-Before deployment, run:
+The project has been checked using the following commands:
 
 ```bash
 npm run test:run
@@ -83,36 +95,49 @@ npm run lint
 npm run build
 ```
 
-All three checks passed during the latest development verification.
+**Latest recorded verification:**
+
+- 73 automated tests passed across 16 test files.
+- ESLint completed successfully.
+- Production build completed successfully.
 
 ## Data and Persistence
 
-The current implementation uses mock data rather than a connected production backend.
+The dashboard currently operates with mock data rather than a live production API.
 
-- **Products and settings:** Persist in browser `localStorage` where implemented.
-- **Order status changes:** Currently held in application memory and reset when the page is refreshed.
-- **Analytics:** Use mock data and do not represent live store transactions.
+- **Products:** Product records use localStorage where implemented.
+- **Settings:** Settings use localStorage where implemented.
+- **Orders:** Order status changes are held in application memory and reset when the page is refreshed.
+- **Analytics:** Analytics information is generated from mock data.
 
-A backend and database integration would be needed for shared, persistent order updates and real-time analytics across users and devices.
+A production backend and database would be required to support shared, persistent updates and real-time store analytics.
 
 ## Responsive Design
 
-The dashboard supports desktop and mobile layouts. Product and order tables are presented on larger screens, while mobile layouts use cards to improve readability and avoid unnecessary horizontal scrolling.
+The interface is designed to work across different screen sizes.
 
-Keyboard navigation and the mobile hamburger menu have also been checked during accessibility testing.
+- Desktop layouts use tables for structured information.
+- Mobile layouts use responsive cards where appropriate.
+- Navigation adapts to smaller screens.
+- Keyboard-friendly interactions support accessibility.
 
 ## Future Improvements
 
-- Integrate a production API and database.
-- Persist order status changes.
-- Connect analytics to real store data.
+Potential next steps include:
+
+- Connect the dashboard to a production API and database.
+- Implement persistent order management.
+- Integrate real-time sales and business analytics.
 - Add authentication and role-based access control.
-- Add further automated tests as the application grows.
+- Expand automated test coverage.
 
 ## Project Links
 
-- **Live Demo:** [View E-Commerce Admin Dashboard](https://ecommerce-admin-dashboard-immg2arg9-mi-mi-tech19.vercel.app/)
-- **Source Code:** [GitHub Repository](https://github.com/MiMi-Tech19/ecommerce-admin-dashboard)
+- **GitHub Repository:** [E-Commerce Admin Dashboard](https://github.com/MiMi-Tech19/ecommerce-admin-dashboard)
+
+- **Live Demo:** [View Live Dashboard](https://ecommerce-admin-dashboard-r9nm28jvw-mi-mi-tech19.vercel.app/)
+
+> **Note:** Use the Vercel Shareable Link configured to allow access to anyone with the link. The ordinary protected deployment URL may redirect visitors to Vercel login.
 
 ## Screenshots
 
@@ -128,7 +153,6 @@ Keyboard navigation and the mobile hamburger menu have also been checked during 
 
 ![Order Management](screenshots/orders.png)
 
-
 ## Author
 
-Developed as part of an AltSchool Africa frontend development project, with a focus on responsive UI design, TypeScript, component testing, and maintainable React architecture.
+Developed as part of the **AltSchool Africa Frontend Engineering programme**.
