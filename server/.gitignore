@@ -17,3 +17,6 @@ src/generated/prisma/
 prisma-connection-test.mjs
 prisma-connection-test.ts
 prisma-prisma-test.ts
+
+# Prisma AI tooling lock file
+skills-lock.json
