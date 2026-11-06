@@ -51,6 +51,11 @@ export function OrdersPage() {
   const updateOrderStatus = useUpdateOrderStatus();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
+  function clearUpdateError() {
+    if (updateOrderStatus.isError) {
+      updateOrderStatus.reset();
+    }
+  }
 
   const filteredOrders = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -86,14 +91,14 @@ export function OrdersPage() {
   ).length;
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-6" onClick={clearUpdateError}>
+      {" "}
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Orders</h1>
         <p className="mt-2 text-slate-600">
           Manage customer orders and order statuses.
         </p>
       </div>
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Total Orders</p>
@@ -130,7 +135,6 @@ export function OrdersPage() {
           </p>
         </div>
       </div>
-
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="flex flex-col gap-4 border-b border-slate-200 p-5 md:flex-row md:items-center md:justify-between">
           <div>
@@ -155,7 +159,10 @@ export function OrdersPage() {
                 id="order-search"
                 type="search"
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => {
+                  clearUpdateError();
+                  setSearchTerm(event.target.value);
+                }}
                 placeholder="Search orders..."
                 className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:w-64"
               />
@@ -169,9 +176,10 @@ export function OrdersPage() {
               <select
                 id="order-status-filter"
                 value={statusFilter}
-                onChange={(event) =>
-                  setStatusFilter(event.target.value as "all" | OrderStatus)
-                }
+                onChange={(event) => {
+                  clearUpdateError();
+                  setStatusFilter(event.target.value as "all" | OrderStatus);
+                }}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:w-40"
               >
                 {statusOptions.map((status) => (
@@ -209,7 +217,9 @@ export function OrdersPage() {
 
         {updateOrderStatus.isError && (
           <p role="alert" className="px-5 py-3 text-sm text-red-600">
-            Unable to update order status. Please try again.
+            {updateOrderStatus.error instanceof Error
+              ? updateOrderStatus.error.message
+              : "Unable to update order status. Please try again."}
           </p>
         )}
 
