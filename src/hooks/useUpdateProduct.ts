@@ -1,4 +1,6 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '../context/AuthContext';
 import { updateProduct } from '../services/products';
 import type { Product } from '../types';
 
@@ -11,10 +13,11 @@ interface UpdateProductVariables {
 
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
+  const { token } = useAuth();
 
   return useMutation({
     mutationFn: ({ id, product }: UpdateProductVariables) =>
-      updateProduct(id, product),
+      updateProduct(id, product, token),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({

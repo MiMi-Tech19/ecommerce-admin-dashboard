@@ -14,7 +14,7 @@ export interface DashboardAnalytics {
   totalRevenue: number;
   totalOrders: number;
   totalProducts: number;
-  conversionRate: number;
+  conversionRate: number | null;
   salesOverTime: SalesMetric[];
   salesByCategory: CategorySales[];
 }
