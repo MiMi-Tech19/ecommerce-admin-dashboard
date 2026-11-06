@@ -1,35 +1,46 @@
+import { lazy, Suspense } from "react";
+import {
+  createBrowserRouter,
+  Navigate,
+  useLocation,
+} from 'react-router-dom';import { useAuth } from "../context/AuthContext";
+import { AppLayout } from "../layouts/AppLayout";
+import { LoginPage } from "../pages/LoginPage";
+import { NotFoundPage } from "../pages/NotFoundPage";
+import { RegisterPage } from "../pages/RegisterPage";
 
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
-import { AppLayout } from '../layouts/AppLayout';
-import { NotFoundPage } from '../pages/NotFoundPage';
+const UsersPage = lazy(() =>
+  import("../pages/UsersPage").then((module) => ({
+    default: module.UsersPage,
+  })),
+);
 
 const DashboardPage = lazy(() =>
-  import('../pages/DashboardPage').then((module) => ({
+  import("../pages/DashboardPage").then((module) => ({
     default: module.DashboardPage,
   })),
 );
 
 const ProductsPage = lazy(() =>
-  import('../pages/ProductsPage').then((module) => ({
+  import("../pages/ProductsPage").then((module) => ({
     default: module.ProductsPage,
   })),
 );
 
 const OrdersPage = lazy(() =>
-  import('../pages/OrdersPage').then((module) => ({
+  import("../pages/OrdersPage").then((module) => ({
     default: module.OrdersPage,
   })),
 );
 
 const AnalyticsPage = lazy(() =>
-  import('../pages/AnalyticsPage').then((module) => ({
+  import("../pages/AnalyticsPage").then((module) => ({
     default: module.AnalyticsPage,
   })),
 );
 
 const SettingsPage = lazy(() =>
-  import('../pages/SettingsPage').then((module) => ({
+  import("../pages/SettingsPage").then((module) => ({
     default: module.SettingsPage,
   })),
 );
@@ -46,10 +57,33 @@ function PageLoading() {
   );
 }
 
+function ProtectedRoute() {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (location.pathname === '/users' && user?.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <AppLayout />;
+}
+
 export const routeConfig = [
   {
-    path: '/',
-    element: <AppLayout />,
+    path: "/login",
+    element: <LoginPage />,
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />,
+  },
+  {
+    path: "/",
+    element: <ProtectedRoute />,
     errorElement: <NotFoundPage />,
     children: [
       {
@@ -61,7 +95,7 @@ export const routeConfig = [
         ),
       },
       {
-        path: 'products',
+        path: "products",
         element: (
           <Suspense fallback={<PageLoading />}>
             <ProductsPage />
@@ -69,7 +103,7 @@ export const routeConfig = [
         ),
       },
       {
-        path: 'orders',
+        path: "orders",
         element: (
           <Suspense fallback={<PageLoading />}>
             <OrdersPage />
@@ -77,7 +111,7 @@ export const routeConfig = [
         ),
       },
       {
-        path: 'analytics',
+        path: "analytics",
         element: (
           <Suspense fallback={<PageLoading />}>
             <AnalyticsPage />
@@ -85,7 +119,15 @@ export const routeConfig = [
         ),
       },
       {
-        path: 'settings',
+        path: "users",
+        element: (
+          <Suspense fallback={<PageLoading />}>
+            <UsersPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "settings",
         element: (
           <Suspense fallback={<PageLoading />}>
             <SettingsPage />
@@ -95,7 +137,7 @@ export const routeConfig = [
     ],
   },
   {
-    path: '*',
+    path: "*",
     element: <NotFoundPage />,
   },
 ];

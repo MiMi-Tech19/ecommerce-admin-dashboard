@@ -1,4 +1,3 @@
-
 import {
   Clock3,
   DollarSign,
@@ -6,6 +5,7 @@ import {
   ShoppingCart,
   TrendingUp,
 } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
 import { useOrders } from "../hooks/useOrders";
@@ -48,7 +48,11 @@ function AnalyticsSkeleton() {
   );
 }
 
-function RecentOrders({ orders }: { orders: ReturnType<typeof useOrders>["data"] }) {
+function RecentOrders({
+  orders,
+}: {
+  orders: ReturnType<typeof useOrders>["data"];
+}) {
   const orderList = orders ?? [];
 
   return (
@@ -228,11 +232,12 @@ function RecentOrders({ orders }: { orders: ReturnType<typeof useOrders>["data"]
 }
 
 export function DashboardPage() {
+  const [period, setPeriod] = useState(7);
   const {
     data: analytics,
     isLoading: isAnalyticsLoading,
     isError: isAnalyticsError,
-  } = useDashboardAnalytics();
+  } = useDashboardAnalytics(period);
 
   const {
     data: orders = [],
@@ -273,32 +278,28 @@ export function DashboardPage() {
             <MetricCard
               title="Total Revenue"
               value={`$${analytics.totalRevenue.toLocaleString()}`}
-              change="+12.5%"
-              positive
               icon={DollarSign}
             />
 
             <MetricCard
               title="Total Orders"
               value={analytics.totalOrders.toLocaleString()}
-              change="+8.2%"
-              positive
               icon={ShoppingCart}
             />
 
             <MetricCard
               title="Total Products"
               value={analytics.totalProducts.toLocaleString()}
-              change="+4.3%"
-              positive
               icon={Package}
             />
 
             <MetricCard
               title="Conversion Rate"
-              value={`${analytics.conversionRate}%`}
-              change="-1.2%"
-              positive={false}
+              value={
+                analytics.conversionRate === null
+                  ? "N/A"
+                  : `${analytics.conversionRate}%`
+              }
               icon={TrendingUp}
             />
           </div>
@@ -312,14 +313,15 @@ export function DashboardPage() {
                     Sales Overview
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
-                    Revenue and orders over the last 7 days
+                    Revenue and orders over the last {period} days
                   </p>
                 </div>
 
                 <select
                   aria-label="Sales period"
                   className="w-fit rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:ring-2 focus:ring-slate-300"
-                  defaultValue="7"
+                  value={String(period)}
+                  onChange={(event) => setPeriod(Number(event.target.value))}
                 >
                   <option value="7">Last 7 days</option>
                   <option value="30">Last 30 days</option>
@@ -327,27 +329,51 @@ export function DashboardPage() {
                 </select>
               </div>
 
-              <div className="mt-8 flex h-64 items-end gap-2 sm:gap-4">
-                {analytics.salesOverTime.map((item) => {
-                  const height =
-                    maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
+              <div className="mt-8 max-w-full overflow-x-auto">
+                <div
+                  className={
+                    period === 7
+                      ? "flex h-64 min-w-0 items-end gap-2 sm:gap-4"
+                      : "flex h-64 w-max items-end gap-3"
+                  }
+                >
+                  {analytics.salesOverTime.map((item) => {
+                    const height =
+                      maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
 
-                  return (
-                    <div
-                      key={item.date}
-                      className="flex h-full flex-1 flex-col justify-end"
-                    >
+                    const [year, month, day] = item.date.split("-").map(Number);
+
+                    const dateLabel = new Date(
+                      year,
+                      month - 1,
+                      day,
+                    ).toLocaleDateString("en", {
+                      month: "short",
+                      day: "numeric",
+                    });
+
+                    return (
                       <div
-                        className="rounded-t-md bg-slate-900 transition-all hover:bg-slate-700 dark:!bg-blue-500 dark:hover:!bg-blue-400"
-                        style={{ height: `${height}%` }}
-                        title={`$${item.revenue.toLocaleString()} revenue`}
-                      />
-                      <span className="mt-2 text-center text-xs text-slate-400">
-                        {item.date}
-                      </span>
-                    </div>
-                  );
-                })}
+                        key={item.date}
+                        className={
+                          period === 7
+                            ? "flex h-full min-w-0 flex-1 flex-col justify-end"
+                            : "flex h-full w-10 shrink-0 flex-col justify-end"
+                        }
+                      >
+                        <div
+                          className="rounded-t-md bg-slate-900 transition-all hover:bg-slate-700 dark:!bg-blue-500 dark:hover:!bg-blue-400"
+                          style={{ height: `${height}%` }}
+                          title={`${dateLabel}: $${item.revenue.toLocaleString()} revenue, ${item.orders} orders`}
+                        />
+
+                        <span className="mt-2 whitespace-nowrap text-center text-[11px] text-slate-400">
+                          {dateLabel}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
