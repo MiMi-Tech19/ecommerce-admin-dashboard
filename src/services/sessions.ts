@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch, parseJsonResponse } from './api';
 
 const SESSIONS_ENDPOINT = '/api/sessions';
 
@@ -44,11 +44,10 @@ interface SessionActionResponse {
 export async function getActiveSessions(): Promise<UserSession[]> {
   const response = await apiFetch(SESSIONS_ENDPOINT);
 
-  const data = (await response.json()) as SessionsResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Unable to retrieve active sessions.');
-  }
+  const data = await parseJsonResponse<SessionsResponse>(
+    response,
+    'Unable to retrieve active sessions.',
+  );
 
   return data.data;
 }
@@ -56,11 +55,10 @@ export async function getActiveSessions(): Promise<UserSession[]> {
 export async function getSessionHistory(): Promise<SessionHistory[]> {
   const response = await apiFetch(`${SESSIONS_ENDPOINT}/history`);
 
-  const data = (await response.json()) as SessionHistoryResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Unable to retrieve session history.');
-  }
+  const data = await parseJsonResponse<SessionHistoryResponse>(
+    response,
+    'Unable to retrieve session history.',
+  );
 
   return data.data;
 }
@@ -73,13 +71,10 @@ export async function revokeSession(id: string): Promise<SessionActionResponse> 
     },
   );
 
-  const data = (await response.json()) as SessionActionResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Unable to terminate session.');
-  }
-
-  return data;
+  return parseJsonResponse<SessionActionResponse>(
+    response,
+    'Unable to terminate session.',
+  );
 }
 
 export async function revokeAllSessions(): Promise<SessionActionResponse> {
@@ -87,11 +82,8 @@ export async function revokeAllSessions(): Promise<SessionActionResponse> {
     method: 'DELETE',
   });
 
-  const data = (await response.json()) as SessionActionResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Unable to terminate all sessions.');
-  }
-
-  return data;
+  return parseJsonResponse<SessionActionResponse>(
+    response,
+    'Unable to terminate all sessions.',
+  );
 }

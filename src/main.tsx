@@ -4,16 +4,28 @@ import App from "./App";
 import "./index.css";
 
 async function enableMocking(): Promise<void> {
-  const shouldEnableMocking = import.meta.env.VITE_ENABLE_MSW === "true";
-  if (shouldEnableMocking) {
-    const { worker } = await import("./mocks/browser");
+  const hasBackendUrl = Boolean(
+    import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL,
+  );
+  const mswEnv = import.meta.env.VITE_ENABLE_MSW;
 
-    await worker.start({
-      onUnhandledRequest: "bypass",
-      serviceWorker: {
-        url: `${import.meta.env.BASE_URL}mockServiceWorker.js`,
-      },
-    });
+  // Enable MSW if explicitly enabled, or by default when running without a remote backend API
+  const shouldEnableMocking =
+    mswEnv === "true" || (mswEnv !== "false" && !hasBackendUrl);
+
+  if (shouldEnableMocking) {
+    try {
+      const { worker } = await import("./mocks/browser");
+
+      await worker.start({
+        onUnhandledRequest: "bypass",
+        serviceWorker: {
+          url: `${import.meta.env.BASE_URL}mockServiceWorker.js`,
+        },
+      });
+    } catch (err) {
+      console.warn("Could not start Mock Service Worker:", err);
+    }
   }
 }
 
