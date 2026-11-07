@@ -12,6 +12,7 @@ import analyticsRouter from './routes/analytics.routes.js';
 import usersRouter from './routes/users.routes.js';
 import cookieParser from 'cookie-parser';
 import sessionsRouter from './routes/sessions.routes.js';
+import adminSessionsRouter from './routes/admin-sessions.routes.js';
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use('/api/orders', ordersRouter);
 app.use('/api/analytics', analyticsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/admin/sessions', adminSessionsRouter);
 app.get('/api/health', (_req, res) => {
   res.status(200).json({
     success: true,
