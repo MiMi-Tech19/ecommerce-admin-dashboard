@@ -1,17 +1,12 @@
-
 import type { Order, OrderStatus } from '../types';
-import { apiFetch } from './api';
+import { apiFetch, parseJsonResponse } from './api';
 
 const ORDERS_ENDPOINT = '/api/orders';
 
 export async function getOrders(): Promise<Order[]> {
   const response = await apiFetch(ORDERS_ENDPOINT);
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch orders');
-  }
-
-  return response.json() as Promise<Order[]>;
+  return parseJsonResponse<Order[]>(response, 'Failed to fetch orders');
 }
 
 export async function updateOrderStatus(
@@ -30,18 +25,8 @@ export async function updateOrderStatus(
     throw new Error('Only admins can update order status.');
   }
 
-  if (!response.ok) {
-    let message = 'Unable to update order status. Please try again.';
-
-    try {
-      const data = (await response.json()) as { message?: string };
-      message = data.message || message;
-    } catch {
-      // Keep the fallback message if the response isn't valid JSON.
-    }
-
-    throw new Error(message);
-  }
-
-  return response.json() as Promise<Order>;
+  return parseJsonResponse<Order>(
+    response,
+    'Unable to update order status. Please try again.',
+  );
 }

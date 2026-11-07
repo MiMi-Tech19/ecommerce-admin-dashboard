@@ -7,14 +7,40 @@ import { products } from "./data/products";
 import { generateVisitorAnalytics, getMockRealtimeVisitors } from "./data/visitors";
 
 const PRODUCTS_STORAGE_KEY = "shopadmin-products";
+const MOCK_USER_STORAGE_KEY = "shopadmin-mock-user";
 const currentOrders: Order[] = orders.map((order) => ({ ...order }));
 
-let mockCurrentUser: AuthUser | null = {
-  id: "user-admin-1",
-  name: "Admin User",
-  email: "admin@example.com",
-  role: "ADMIN",
-};
+function loadMockUser(): AuthUser | null {
+  try {
+    const saved = localStorage.getItem(MOCK_USER_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved) as AuthUser;
+    }
+  } catch {
+    // Keep default
+  }
+
+  return {
+    id: "user-admin-1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "ADMIN",
+  };
+}
+
+let mockCurrentUser: AuthUser | null = loadMockUser();
+
+function saveMockUser(user: AuthUser | null): void {
+  try {
+    if (user) {
+      localStorage.setItem(MOCK_USER_STORAGE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(MOCK_USER_STORAGE_KEY);
+    }
+  } catch {
+    // Keep in-memory
+  }
+}
 
 function isProduct(value: unknown): value is Product {
   if (typeof value !== "object" || value === null) {
@@ -237,77 +263,6 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.post("/api/auth/login", async ({ request }) => {
-    const body = (await request.json()) as {
-      email?: string;
-      password?: string;
-      role?: string;
-    };
-    const email = (body.email || "").trim().toLowerCase();
-    const role = body.role || "STAFF";
-
-    const user = {
-      id: "mock-user-1",
-      name: email.split("@")[0] || "User",
-      email: email || "user@example.com",
-      role,
-      createdAt: new Date().toISOString(),
-    };
-
-    return HttpResponse.json({
-      success: true,
-      message: "Logged in successfully.",
-      user,
-    });
-  }),
-
-  http.post("/api/auth/register", async ({ request }) => {
-    const body = (await request.json()) as {
-      name?: string;
-      email?: string;
-      password?: string;
-    };
-    const email = (body.email || "").trim().toLowerCase();
-    const name = (body.name || "").trim() || "User";
-
-    const user = {
-      id: `mock-user-${Date.now()}`,
-      name,
-      email,
-      role: "STAFF",
-      createdAt: new Date().toISOString(),
-    };
-
-    return HttpResponse.json(
-      {
-        success: true,
-        message: "Account created successfully.",
-        user,
-      },
-      { status: 201 },
-    );
-  }),
-
-  http.get("/api/auth/me", () => {
-    return HttpResponse.json({
-      success: true,
-      user: {
-        id: "mock-user-1",
-        name: "Admin User",
-        email: "admin@example.com",
-        role: "ADMIN",
-        createdAt: new Date().toISOString(),
-      },
-    });
-  }),
-
-  http.post("/api/auth/logout", () => {
-    return HttpResponse.json({
-      success: true,
-      message: "Logged out successfully.",
-    });
-  }),
-
   http.get("/api/analytics/dashboard", () => {
     return HttpResponse.json(dashboardAnalytics);
   }),
@@ -410,6 +365,7 @@ http.patch("/api/orders/:id/status", async ({ params, request }) => {
       email,
       role,
     };
+    saveMockUser(mockCurrentUser);
 
     return HttpResponse.json({
       success: true,
@@ -445,15 +401,19 @@ http.patch("/api/orders/:id/status", async ({ params, request }) => {
       email,
       role: "STAFF",
     };
+    saveMockUser(mockCurrentUser);
 
-    return HttpResponse.json({
-      success: true,
-      message: "Registration successful.",
-      user: {
-        ...mockCurrentUser,
-        createdAt: new Date().toISOString(),
+    return HttpResponse.json(
+      {
+        success: true,
+        message: "Registration successful.",
+        user: {
+          ...mockCurrentUser,
+          createdAt: new Date().toISOString(),
+        },
       },
-    });
+      { status: 201 },
+    );
   }),
 
   http.get("/api/auth/me", () => {
@@ -471,6 +431,7 @@ http.patch("/api/orders/:id/status", async ({ params, request }) => {
 
   http.post("/api/auth/logout", () => {
     mockCurrentUser = null;
+    saveMockUser(null);
     return HttpResponse.json({
       success: true,
       message: "Logged out successfully",

@@ -57,9 +57,9 @@ export function RegisterPage() {
       navigate("/", { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (/string did not match|syntaxerror|unexpected token/i.test(msg)) {
+      if (/string did not match|unexpected (end|token)|syntaxerror|failed to execute 'json'/i.test(msg)) {
         setError(
-          "Unable to connect to the authentication server. Please check your network connection.",
+          "Unable to connect to the authentication service. Please check your network connection.",
         );
       } else {
         setError(
