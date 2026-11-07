@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
 
@@ -85,9 +84,7 @@ export function AnalyticsPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Conversion Rate</p>
           <p className="mt-2 text-2xl font-bold text-slate-900">
-            {data.conversionRate === null
-              ? "N/A"
-              : `${data.conversionRate}%`}
+            {data.conversionRate === null ? "N/A" : `${data.conversionRate}%`}
           </p>
         </div>
       </div>
@@ -116,19 +113,24 @@ export function AnalyticsPage() {
           </select>
         </div>
 
-        <div className="space-y-5">
+        <div
+          className={
+            period === 7
+              ? "space-y-5"
+              : "max-h-[420px] space-y-5 overflow-y-auto overscroll-contain pr-2"
+          }
+        >
           {data.salesOverTime.map((metric) => {
             const revenuePercentage = (metric.revenue / maxRevenue) * 100;
 
             const [year, month, day] = metric.date.split("-").map(Number);
-            const dateLabel = new Date(
-              year,
-              month - 1,
-              day,
-            ).toLocaleDateString("en", {
-              month: "short",
-              day: "numeric",
-            });
+            const dateLabel = new Date(year, month - 1, day).toLocaleDateString(
+              "en",
+              {
+                month: "short",
+                day: "numeric",
+              },
+            );
 
             return (
               <div

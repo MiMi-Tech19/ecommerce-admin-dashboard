@@ -1,20 +1,20 @@
-
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import type { LoginCredentials, UserRole } from '../types/auth';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import type { LoginCredentials, UserRole } from "../types/auth";
+import { ShoppingBag } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
   const [credentials, setCredentials] = useState<LoginCredentials>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
 
-  const [selectedRole, setSelectedRole] = useState<UserRole>('STAFF');
-  const [error, setError] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>("STAFF");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   function handleChange(field: keyof LoginCredentials, value: string) {
@@ -22,22 +22,22 @@ export function LoginPage() {
       ...current,
       [field]: value,
     }));
-    setError('');
+    setError("");
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       await login(credentials, selectedRole);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Unable to log in. Please try again.',
+          : "Unable to log in. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -48,13 +48,11 @@ export function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
-            S
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-200">
+            <ShoppingBag size={25} strokeWidth={2.2} />
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900">
-            Welcome back
-          </h1>
+          <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
 
           <p className="mt-2 text-sm text-slate-500">
             Sign in to access your e-commerce dashboard.
@@ -76,7 +74,7 @@ export function LoginPage() {
                 value={selectedRole}
                 onChange={(event) => {
                   setSelectedRole(event.target.value as UserRole);
-                  setError('');
+                  setError("");
                 }}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
@@ -99,7 +97,7 @@ export function LoginPage() {
                 autoComplete="email"
                 required
                 value={credentials.email}
-                onChange={(event) => handleChange('email', event.target.value)}
+                onChange={(event) => handleChange("email", event.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -120,7 +118,7 @@ export function LoginPage() {
                 required
                 value={credentials.password}
                 onChange={(event) =>
-                  handleChange('password', event.target.value)
+                  handleChange("password", event.target.value)
                 }
                 placeholder="Enter your password"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -141,13 +139,13 @@ export function LoginPage() {
               disabled={isLoading}
               className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? 'Signing in...' : 'Sign in'}
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <Link
             to="/register"
             className="font-semibold text-blue-600 hover:text-blue-700"

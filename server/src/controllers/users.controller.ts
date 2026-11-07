@@ -2,7 +2,10 @@
 import type { Response } from 'express';
 import { prisma } from '../config/database.js';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
-import { updateUserRoleSchema } from '../validators/user.validator.js';
+import {
+  updateProfileSchema,
+  updateUserRoleSchema,
+} from '../validators/user.validator.js';
 
 export async function getUsers(_req: AuthenticatedRequest, res: Response) {
   const users = await prisma.user.findMany({
@@ -21,6 +24,43 @@ export async function getUsers(_req: AuthenticatedRequest, res: Response) {
   return res.status(200).json({
     success: true,
     users,
+  });
+}
+
+export async function updateMyProfile(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  const result = updateProfileSchema.safeParse(req.body);
+
+  if (!result.success) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid profile data.',
+      errors: result.error.flatten(),
+    });
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: {
+      id: req.user!.userId,
+    },
+    data: {
+      name: result.data.name,
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  return res.status(200).json({
+    success: true,
+    message: 'Profile updated successfully.',
+    user: updatedUser,
   });
 }
 

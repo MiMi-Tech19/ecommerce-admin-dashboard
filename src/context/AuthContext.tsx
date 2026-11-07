@@ -14,12 +14,15 @@ import {
   logoutUser,
 } from '../services/auth';
 
+import { updateMyProfile } from '../services/users';
+
 import type {
   AuthUser,
   LoginCredentials,
   RegisterCredentials,
   UserRole,
 } from '../types/auth';
+
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -30,6 +33,7 @@ interface AuthContextType {
     selectedRole: UserRole,
   ) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
+  updateProfile: (name: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -71,6 +75,11 @@ async function login(
     setUser(response.user);
   }
 
+  async function updateProfile(name: string): Promise<void> {
+  const response = await updateMyProfile(name);
+  setUser(response.user);
+}
+
   async function logout(): Promise<void> {
     try {
       await logoutUser();
@@ -88,6 +97,7 @@ async function login(
         login,
         register,
         logout,
+        updateProfile,
       }}
     >
       {children}

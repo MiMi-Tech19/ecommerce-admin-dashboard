@@ -1,21 +1,21 @@
-
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import type { RegisterCredentials } from '../types/auth';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import type { RegisterCredentials } from "../types/auth";
+import { ShoppingBag } from "lucide-react";
 
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
 
   const [credentials, setCredentials] = useState<RegisterCredentials>({
-    name: '',
-    email: '',
-    password: '',
+    name: "",
+    email: "",
+    password: "",
   });
 
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   function handleChange(field: keyof RegisterCredentials, value: string) {
@@ -24,20 +24,20 @@ export function RegisterPage() {
       [field]: value,
     }));
 
-    setError('');
+    setError("");
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError('');
+    setError("");
 
     if (credentials.password.length < 8) {
-      setError('Password must contain at least 8 characters.');
+      setError("Password must contain at least 8 characters.");
       return;
     }
 
     if (credentials.password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError("Passwords do not match.");
       return;
     }
 
@@ -45,12 +45,12 @@ export function RegisterPage() {
 
     try {
       await register(credentials);
-      navigate('/', { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : 'Unable to create your account. Please try again.',
+          : "Unable to create your account. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -61,8 +61,8 @@ export function RegisterPage() {
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-10">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-xl font-bold text-white">
-            S
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-200">
+            <ShoppingBag size={25} strokeWidth={2.2} />
           </div>
 
           <h1 className="text-2xl font-bold text-slate-900">
@@ -91,7 +91,7 @@ export function RegisterPage() {
                 required
                 minLength={2}
                 value={credentials.name}
-                onChange={(event) => handleChange('name', event.target.value)}
+                onChange={(event) => handleChange("name", event.target.value)}
                 placeholder="Enter your full name"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -111,7 +111,7 @@ export function RegisterPage() {
                 autoComplete="email"
                 required
                 value={credentials.email}
-                onChange={(event) => handleChange('email', event.target.value)}
+                onChange={(event) => handleChange("email", event.target.value)}
                 placeholder="you@example.com"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               />
@@ -133,7 +133,7 @@ export function RegisterPage() {
                 minLength={8}
                 value={credentials.password}
                 onChange={(event) =>
-                  handleChange('password', event.target.value)
+                  handleChange("password", event.target.value)
                 }
                 placeholder="At least 8 characters"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -156,7 +156,7 @@ export function RegisterPage() {
                 value={confirmPassword}
                 onChange={(event) => {
                   setConfirmPassword(event.target.value);
-                  setError('');
+                  setError("");
                 }}
                 placeholder="Re-enter your password"
                 className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -182,13 +182,13 @@ export function RegisterPage() {
               disabled={isLoading}
               className="w-full rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? "Creating account..." : "Create account"}
             </button>
           </form>
         </div>
 
         <p className="mt-6 text-center text-sm text-slate-500">
-          Already have an account?{' '}
+          Already have an account?{" "}
           <Link
             to="/login"
             className="font-semibold text-blue-600 hover:text-blue-700"

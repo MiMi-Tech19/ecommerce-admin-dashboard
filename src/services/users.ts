@@ -23,6 +23,12 @@ interface UpdateUserRoleResponse {
   user: ManagedUser;
 }
 
+interface UpdateMyProfileResponse {
+  success: boolean;
+  message: string;
+  user: ManagedUser;
+}
+
 export async function getUsers(): Promise<ManagedUser[]> {
   const response = await apiFetch(USERS_ENDPOINT);
 
@@ -55,6 +61,25 @@ export async function updateUserRole(
 
   if (!response.ok) {
     throw new Error(data.message || 'Unable to update user role.');
+  }
+
+  return data;
+}
+
+export async function updateMyProfile(
+  name: string,
+): Promise<UpdateMyProfileResponse> {
+  const response = await apiFetch(`${USERS_ENDPOINT}/me`, {
+    method: 'PATCH',
+    body: JSON.stringify({ name }),
+  });
+
+  const data = (await response.json()) as UpdateMyProfileResponse & {
+    message?: string;
+  };
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Unable to update profile.');
   }
 
   return data;
