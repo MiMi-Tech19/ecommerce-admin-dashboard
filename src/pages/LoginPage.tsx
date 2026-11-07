@@ -36,11 +36,14 @@ export function LoginPage() {
       await login(credentials, selectedRole);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to log in. Please try again.",
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/string did not match|syntaxerror|unexpected token/i.test(msg)) {
+        setError(
+          "Unable to connect to the authentication server. Please check your network connection.",
+        );
+      } else {
+        setError(msg || "Unable to log in. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -97,6 +100,9 @@ export function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 required
                 value={credentials.email}
                 onChange={(event) => handleChange("email", event.target.value)}
@@ -118,6 +124,9 @@ export function LoginPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   required
                   value={credentials.password}
                   onChange={(event) =>
@@ -136,6 +145,7 @@ export function LoginPage() {
                 </button>
               </div>
             </div>
+
 
 
             {error && (

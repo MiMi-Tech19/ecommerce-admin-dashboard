@@ -40,7 +40,13 @@ export function RegisterPage() {
     }
 
     if (credentials.password !== confirmPassword) {
-      setError("Passwords do not match.");
+      if (credentials.password.trim() === confirmPassword.trim()) {
+        setError(
+          "Passwords do not match due to extra spaces. Please remove any spaces.",
+        );
+      } else {
+        setError("Passwords do not match.");
+      }
       return;
     }
 
@@ -50,11 +56,16 @@ export function RegisterPage() {
       await register(credentials);
       navigate("/", { replace: true });
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Unable to create your account. Please try again.",
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (/string did not match|syntaxerror|unexpected token/i.test(msg)) {
+        setError(
+          "Unable to connect to the authentication server. Please check your network connection.",
+        );
+      } else {
+        setError(
+          msg || "Unable to create your account. Please try again.",
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +102,7 @@ export function RegisterPage() {
                 id="name"
                 type="text"
                 autoComplete="name"
+                autoCapitalize="words"
                 required
                 minLength={2}
                 value={credentials.name}
@@ -112,6 +124,9 @@ export function RegisterPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 required
                 value={credentials.email}
                 onChange={(event) => handleChange("email", event.target.value)}
@@ -133,6 +148,9 @@ export function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   required
                   minLength={8}
                   value={credentials.password}
@@ -166,6 +184,9 @@ export function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
                   required
                   value={confirmPassword}
                   onChange={(event) => {
