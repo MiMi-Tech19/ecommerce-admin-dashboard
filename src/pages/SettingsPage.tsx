@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSettings } from "../context/SettingsContext";
 import { useAuth } from "../context/AuthContext";
+import { SessionManagement } from '../components/settings/SessionManagement';
 
 export function SettingsPage() {
   const { settings, dispatch } = useSettings();
@@ -371,7 +372,9 @@ export function SettingsPage() {
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
-      </div>
+            </div>
+
+      <SessionManagement />
     </section>
   );
 }

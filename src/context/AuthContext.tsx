@@ -23,6 +23,7 @@ import type {
   UserRole,
 } from '../types/auth';
 
+import { revokeAllSessions } from '../services/sessions';
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -35,6 +36,7 @@ interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>;
   updateProfile: (name: string) => Promise<void>;
   logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -88,6 +90,11 @@ async function login(
     }
   }
 
+  async function logoutAll(): Promise<void> {
+  await revokeAllSessions();
+  setUser(null);
+}
+
   return (
     <AuthContext.Provider
       value={{
@@ -98,6 +105,7 @@ async function login(
         register,
         logout,
         updateProfile,
+        logoutAll,
       }}
     >
       {children}
