@@ -123,3 +123,16 @@ model UserSession {
   @@index([userId, revokedAt])
   @@index([expiresAt])
 }
+
+model VisitorLog {
+  id         String   @id @default(cuid())
+  ipHash     String?
+  userAgent  String?
+  deviceType String   @default("Desktop")
+  referrer   String?
+  pagePath   String   @default("/")
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
