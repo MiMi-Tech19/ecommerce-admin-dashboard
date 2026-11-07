@@ -1,8 +1,14 @@
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { SettingsProvider } from '../context/SettingsContext';
 import { SettingsPage } from './SettingsPage';
+
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => ({
+    updateProfile: vi.fn().mockResolvedValue(undefined),
+  }),
+}));
 
 describe('SettingsPage form validation', () => {
   beforeEach(() => {
@@ -55,7 +61,7 @@ describe('SettingsPage form validation', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows a success message when valid settings are saved', () => {
+  it('shows a success message when valid settings are saved', async () => {
     render(
       <SettingsProvider>
         <SettingsPage />
@@ -64,7 +70,9 @@ describe('SettingsPage form validation', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /save changes/i }));
 
-    expect(screen.getByText(/settings saved successfully/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/settings saved successfully/i),
+    ).toBeInTheDocument();
   });
 
   it('clears a field error when that field is edited', () => {

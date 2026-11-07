@@ -1,4 +1,6 @@
+
 import type { Request, Response, NextFunction } from 'express';
+import { createHash } from 'node:crypto';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../config/database.js';
 
@@ -6,6 +8,7 @@ export interface AuthenticatedRequest extends Request {
   user?: {
     userId: string;
     role: 'ADMIN' | 'STAFF';
+    sessionId: string;
   };
 }
 
@@ -14,25 +17,18 @@ export async function authenticate(
   res: Response,
   next: NextFunction,
 ) {
- const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-const token =
-  req.cookies?.authToken ||
-  (authHeader?.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : null);
-
-if (!token) {
-  return res.status(401).json({
-    success: false,
-    message: 'Authentication required.',
-  });
-}
+  const token =
+    req.cookies?.authToken ||
+    (authHeader?.startsWith('Bearer ')
+      ? authHeader.slice(7)
+      : null);
 
   if (!token) {
     return res.status(401).json({
       success: false,
-      message: 'Invalid authentication token.',
+      message: 'Authentication required.',
     });
   }
 
@@ -58,7 +54,9 @@ if (!token) {
 
   if (
     typeof decoded === 'string' ||
-    typeof decoded.userId !== 'string'
+    typeof decoded.userId !== 'string' ||
+    typeof decoded.sid !== 'string' ||
+    decoded.sub !== decoded.userId
   ) {
     return res.status(401).json({
       success: false,
@@ -66,24 +64,64 @@ if (!token) {
     });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.userId },
-    select: {
-      id: true,
-      role: true,
+  const session = await prisma.userSession.findUnique({
+    where: { id: decoded.sid },
+    include: {
+      user: {
+        select: {
+          id: true,
+          role: true,
+        },
+      },
     },
   });
 
-  if (!user) {
+  if (
+    !session ||
+    session.userId !== decoded.userId ||
+    session.user.id !== decoded.userId ||
+    session.revokedAt ||
+    session.expiresAt <= new Date()
+  ) {
     return res.status(401).json({
       success: false,
-      message: 'User account not found.',
+      message: 'Your session is invalid or has expired. Please log in again.',
+    });
+  }
+
+  const tokenHash = createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  if (session.tokenHash !== tokenHash) {
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid authentication session. Please log in again.',
+    });
+  }
+
+  // Update activity at most once every five minutes per session.
+  const activityThreshold = new Date(Date.now() - 5 * 60 * 1000);
+
+  if (session.lastActive < activityThreshold) {
+    await prisma.userSession.updateMany({
+      where: {
+        id: session.id,
+        revokedAt: null,
+        lastActive: {
+          lt: activityThreshold,
+        },
+      },
+      data: {
+        lastActive: new Date(),
+      },
     });
   }
 
   req.user = {
-    userId: user.id,
-    role: user.role,
+    userId: session.user.id,
+    role: session.user.role,
+    sessionId: session.id,
   };
 
   return next();

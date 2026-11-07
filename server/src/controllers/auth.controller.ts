@@ -1,10 +1,11 @@
+
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/database.js";
-import jwt, { type SignOptions } from "jsonwebtoken";
 import { registerSchema, loginSchema } from "../validators/auth.validator.js";
-import { jwtExpiresIn } from "../config/auth.config.js";
 import { setAuthCookie, clearAuthCookie } from "../utils/auth-cookie.js";
+import { createUserSession } from "../utils/user-session.js";
+import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
 export async function register(req: Request, res: Response) {
   const result = registerSchema.safeParse(req.body);
@@ -48,28 +49,10 @@ export async function register(req: Request, res: Response) {
     },
   });
 
-  const jwtSecret = process.env.JWT_SECRET;
+  const token = await createUserSession(req, user);
 
-  if (!jwtSecret) {
-    return res.status(500).json({
-      success: false,
-      message: "Authentication service is not configured.",
-    });
-  }
-
-  const jwtExpiresIn = process.env.JWT_EXPIRES_IN || "1d";
-
-  const tokenOptions: SignOptions = {
-    expiresIn: jwtExpiresIn as SignOptions["expiresIn"],
-    subject: user.id,
-  };
-
-  const token = jwt.sign(
-    { userId: user.id, role: user.role },
-    jwtSecret,
-    tokenOptions,
-  );
   setAuthCookie(res, token);
+
   return res.status(201).json({
     success: true,
     message: "Account created successfully.",
@@ -89,6 +72,7 @@ export async function login(req: Request, res: Response) {
   }
 
   const { email, password, role } = result.data;
+
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -100,7 +84,10 @@ export async function login(req: Request, res: Response) {
     });
   }
 
-  const passwordMatches = await bcrypt.compare(password, user.passwordHash);
+  const passwordMatches = await bcrypt.compare(
+    password,
+    user.passwordHash,
+  );
 
   if (!passwordMatches) {
     return res.status(401).json({
@@ -119,26 +106,10 @@ export async function login(req: Request, res: Response) {
     });
   }
 
-  const jwtSecret = process.env.JWT_SECRET;
+  const token = await createUserSession(req, user);
 
-  if (!jwtSecret) {
-    throw new Error("JWT_SECRET is not configured.");
-  }
-
-  const tokenOptions: SignOptions = {
-    expiresIn: jwtExpiresIn,
-    subject: user.id,
-  };
-
-  const token = jwt.sign(
-    {
-      userId: user.id,
-      role: user.role,
-    },
-    jwtSecret,
-    tokenOptions,
-  );
   setAuthCookie(res, token);
+
   return res.status(200).json({
     success: true,
     message: "Login successful.",
@@ -151,9 +122,10 @@ export async function login(req: Request, res: Response) {
   });
 }
 
-import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
-
-export async function getCurrentUser(req: AuthenticatedRequest, res: Response) {
+export async function getCurrentUser(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.userId },
@@ -185,11 +157,33 @@ export async function getCurrentUser(req: AuthenticatedRequest, res: Response) {
   }
 }
 
-export function logout(_req: Request, res: Response) {
-  clearAuthCookie(res);
+export async function logout(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    await prisma.userSession.updateMany({
+      where: {
+        id: req.user!.sessionId,
+        userId: req.user!.userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date(),
+        loggedOutAt: new Date(),
+      },
+    });
 
-  return res.status(200).json({
-    success: true,
-    message: "Logged out successfully.",
-  });
+    clearAuthCookie(res);
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully.",
+    });
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: "Unable to log out. Please try again.",
+    });
+  }
 }

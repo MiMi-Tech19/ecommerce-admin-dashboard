@@ -13,6 +13,6 @@ const router = Router();
 router.post("/register", register);
 router.post("/login", loginLimiter, login);
 router.get("/me", authenticate, getCurrentUser);
-router.post("/logout", logout);
+router.post("/logout", authenticate, logout);
 
 export default router;
