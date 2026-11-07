@@ -1,6 +1,5 @@
-
 import type { DashboardAnalytics } from '../types';
-import { apiFetch } from './api';
+import { apiFetch, parseJsonResponse } from './api';
 
 const DASHBOARD_ANALYTICS_ENDPOINT = '/api/analytics/dashboard';
 
@@ -11,9 +10,8 @@ export async function getDashboardAnalytics(
     `${DASHBOARD_ANALYTICS_ENDPOINT}?period=${period}`,
   );
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch dashboard analytics');
-  }
-
-  return response.json() as Promise<DashboardAnalytics>;
+  return parseJsonResponse<DashboardAnalytics>(
+    response,
+    'Failed to fetch dashboard analytics',
+  );
 }

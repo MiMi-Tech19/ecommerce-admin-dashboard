@@ -1,34 +1,12 @@
-
 import type { Product } from '../types';
-import { apiFetch } from './api';
+import { apiFetch, parseJsonResponse } from './api';
 
 const PRODUCTS_ENDPOINT = '/api/products';
-
-async function getErrorMessage(
-  response: Response,
-  fallback: string,
-): Promise<string> {
-  try {
-    const data = (await response.json()) as {
-      message?: string;
-    };
-
-    return data.message || fallback;
-  } catch {
-    return fallback;
-  }
-}
 
 export async function getProducts(): Promise<Product[]> {
   const response = await apiFetch(PRODUCTS_ENDPOINT);
 
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(response, 'Failed to fetch products.'),
-    );
-  }
-
-  return response.json() as Promise<Product[]>;
+  return parseJsonResponse<Product[]>(response, 'Failed to fetch products.');
 }
 
 export async function createProduct(
@@ -39,13 +17,7 @@ export async function createProduct(
     body: JSON.stringify(product),
   });
 
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(response, 'Failed to create product.'),
-    );
-  }
-
-  return response.json() as Promise<Product>;
+  return parseJsonResponse<Product>(response, 'Failed to create product.');
 }
 
 export async function updateProduct(
@@ -60,13 +32,7 @@ export async function updateProduct(
     },
   );
 
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(response, 'Failed to update product.'),
-    );
-  }
-
-  return response.json() as Promise<Product>;
+  return parseJsonResponse<Product>(response, 'Failed to update product.');
 }
 
 export async function deleteProduct(id: string): Promise<void> {
@@ -77,9 +43,5 @@ export async function deleteProduct(id: string): Promise<void> {
     },
   );
 
-  if (!response.ok) {
-    throw new Error(
-      await getErrorMessage(response, 'Failed to delete product.'),
-    );
-  }
+  await parseJsonResponse<void>(response, 'Failed to delete product.');
 }

@@ -1,12 +1,46 @@
 import { http, HttpResponse } from "msw";
 import type { Order, OrderStatus, Product } from "../types";
+import type { AuthUser, UserRole } from "../types/auth";
 import { dashboardAnalytics } from "./data/analytics";
 import { orders } from "./data/orders";
 import { products } from "./data/products";
 import { generateVisitorAnalytics, getMockRealtimeVisitors } from "./data/visitors";
 
 const PRODUCTS_STORAGE_KEY = "shopadmin-products";
+const MOCK_USER_STORAGE_KEY = "shopadmin-mock-user";
 const currentOrders: Order[] = orders.map((order) => ({ ...order }));
+
+function loadMockUser(): AuthUser | null {
+  try {
+    const saved = localStorage.getItem(MOCK_USER_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved) as AuthUser;
+    }
+  } catch {
+    // Keep default
+  }
+
+  return {
+    id: "user-admin-1",
+    name: "Admin User",
+    email: "admin@example.com",
+    role: "ADMIN",
+  };
+}
+
+let mockCurrentUser: AuthUser | null = loadMockUser();
+
+function saveMockUser(user: AuthUser | null): void {
+  try {
+    if (user) {
+      localStorage.setItem(MOCK_USER_STORAGE_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(MOCK_USER_STORAGE_KEY);
+    }
+  } catch {
+    // Keep in-memory
+  }
+}
 
 function isProduct(value: unknown): value is Product {
   if (typeof value !== "object" || value === null) {
@@ -233,6 +267,7 @@ export const handlers = [
     return HttpResponse.json(dashboardAnalytics);
   }),
 
+
   http.get("/api/analytics/visitors", ({ request }) => {
     const url = new URL(request.url);
     const period = Number(url.searchParams.get("period") || "7");
@@ -303,4 +338,103 @@ http.patch("/api/orders/:id/status", async ({ params, request }) => {
 
   return HttpResponse.json(updatedOrder);
 }),
-]
+
+  http.post("/api/auth/login", async ({ request }) => {
+    const body: unknown = await request.json();
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("email" in body) ||
+      typeof body.email !== "string" ||
+      !("password" in body) ||
+      typeof body.password !== "string"
+    ) {
+      return HttpResponse.json(
+        { success: false, message: "Invalid email or password." },
+        { status: 400 },
+      );
+    }
+
+    const email = body.email.trim().toLowerCase();
+    const role: UserRole =
+      "role" in body && body.role === "STAFF" ? "STAFF" : "ADMIN";
+
+    mockCurrentUser = {
+      id: "mock-user-" + Math.random().toString(36).slice(2, 8),
+      name: email.split("@")[0] || "Mock User",
+      email,
+      role,
+    };
+    saveMockUser(mockCurrentUser);
+
+    return HttpResponse.json({
+      success: true,
+      message: "Login successful.",
+      user: mockCurrentUser,
+    });
+  }),
+
+  http.post("/api/auth/register", async ({ request }) => {
+    const body: unknown = await request.json();
+    if (
+      typeof body !== "object" ||
+      body === null ||
+      !("email" in body) ||
+      typeof body.email !== "string" ||
+      !("password" in body) ||
+      typeof body.password !== "string" ||
+      !("name" in body) ||
+      typeof body.name !== "string"
+    ) {
+      return HttpResponse.json(
+        { success: false, message: "Invalid registration data." },
+        { status: 400 },
+      );
+    }
+
+    const email = body.email.trim().toLowerCase();
+    const name = body.name.trim();
+
+    mockCurrentUser = {
+      id: "mock-user-" + Math.random().toString(36).slice(2, 8),
+      name,
+      email,
+      role: "STAFF",
+    };
+    saveMockUser(mockCurrentUser);
+
+    return HttpResponse.json(
+      {
+        success: true,
+        message: "Registration successful.",
+        user: {
+          ...mockCurrentUser,
+          createdAt: new Date().toISOString(),
+        },
+      },
+      { status: 201 },
+    );
+  }),
+
+  http.get("/api/auth/me", () => {
+    if (!mockCurrentUser) {
+      return HttpResponse.json(
+        { success: false, message: "Not authenticated" },
+        { status: 401 },
+      );
+    }
+    return HttpResponse.json({
+      success: true,
+      user: mockCurrentUser,
+    });
+  }),
+
+  http.post("/api/auth/logout", () => {
+    mockCurrentUser = null;
+    saveMockUser(null);
+    return HttpResponse.json({
+      success: true,
+      message: "Logged out successfully",
+    });
+  }),
+];

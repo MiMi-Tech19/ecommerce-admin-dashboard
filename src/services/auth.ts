@@ -1,82 +1,77 @@
 import type {
+  AuthUser,
   LoginCredentials,
   LoginResponse,
   RegisterCredentials,
   RegisterResponse,
   UserRole,
 } from '../types/auth';
+import { apiFetch, parseJsonResponse } from './api';
 
 const AUTH_ENDPOINT = '/api/auth';
-
 
 export async function loginUser(
   credentials: LoginCredentials,
   role: UserRole,
 ): Promise<LoginResponse> {
-  const response = await fetch(`${AUTH_ENDPOINT}/login`, {
+  const normalizedEmail = credentials.email.trim().toLowerCase();
+
+  const response = await apiFetch(`${AUTH_ENDPOINT}/login`, {
     method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ ...credentials, role }),
+    body: JSON.stringify({
+      email: normalizedEmail,
+      password: credentials.password,
+      role,
+    }),
   });
 
-  const data = (await response.json()) as LoginResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Login failed. Please try again.');
-  }
-
-  return data;
+  return parseJsonResponse<LoginResponse>(
+    response,
+    'Login failed. Please try again.',
+  );
 }
-
 
 export async function registerUser(
   credentials: RegisterCredentials,
 ): Promise<RegisterResponse> {
-  const response = await fetch(`${AUTH_ENDPOINT}/register`, {
+  const normalizedEmail = credentials.email.trim().toLowerCase();
+  const normalizedName = credentials.name.trim();
+
+  const response = await apiFetch(`${AUTH_ENDPOINT}/register`, {
     method: 'POST',
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(credentials),
+    body: JSON.stringify({
+      name: normalizedName,
+      email: normalizedEmail,
+      password: credentials.password,
+    }),
   });
 
-  const data = (await response.json()) as RegisterResponse;
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Registration failed. Please try again.');
-  }
-
-  return data;
+  return parseJsonResponse<RegisterResponse>(
+    response,
+    'Registration failed. Please try again.',
+  );
 }
 
-export async function getCurrentUser() {
-  const response = await fetch(`${AUTH_ENDPOINT}/me`, {
+export async function getCurrentUser(): Promise<AuthUser> {
+  const response = await apiFetch(`${AUTH_ENDPOINT}/me`, {
     method: 'GET',
-    credentials: 'include',
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Unable to restore session.');
-  }
+  const data = await parseJsonResponse<{ success: boolean; user: AuthUser; message?: string }>(
+    response,
+    'Unable to restore session.',
+  );
 
   return data.user;
 }
 
 export async function logoutUser(): Promise<void> {
-  const response = await fetch(`${AUTH_ENDPOINT}/logout`, {
+  const response = await apiFetch(`${AUTH_ENDPOINT}/logout`, {
     method: 'POST',
-    credentials: 'include',
   });
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Logout failed.');
-  }
+  await parseJsonResponse<{ success: boolean; message?: string }>(
+    response,
+    'Logout failed.',
+  );
 }
