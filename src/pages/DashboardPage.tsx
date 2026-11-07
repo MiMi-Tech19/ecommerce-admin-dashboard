@@ -4,36 +4,61 @@ import {
   Package,
   ShoppingCart,
   TrendingUp,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
 import { useOrders } from "../hooks/useOrders";
+import {
+  useRealtimeVisitors,
+  useVisitorAnalytics,
+} from "../hooks/useVisitorAnalytics";
 import { MetricCard } from "../components/dashboard/MetricCard";
 import { StatusBadge } from "../components/dashboard/StatusBadge";
 
-function DashboardHeading() {
+
+function DashboardHeading({ liveVisitors }: { liveVisitors?: number }) {
   return (
-    <div className="mb-8">
-      <p className="text-sm font-medium text-slate-500">Overview</p>
-      <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-        Dashboard
-      </h1>
-      <p className="mt-2 text-sm text-slate-500">
-        Monitor your store performance and recent activity.
-      </p>
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-sm font-medium text-slate-500">Overview</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+          Dashboard
+        </h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Monitor your store performance and real-time activity.
+        </p>
+      </div>
+
+      {liveVisitors !== undefined && (
+        <Link
+          to="/analytics"
+          className="flex w-fit items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3.5 py-1.5 text-xs font-semibold text-emerald-800 transition-colors hover:bg-emerald-100"
+          title="Click to view detailed visitor analytics"
+        >
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+          </span>
+          <span>{liveVisitors} Live Visitors</span>
+          <span className="text-emerald-600">→</span>
+        </Link>
+      )}
     </div>
   );
 }
 
+
 function AnalyticsSkeleton() {
   return (
     <>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {[1, 2, 3, 4].map((card) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        {[1, 2, 3, 4, 5].map((card) => (
           <div key={card} className="h-36 animate-pulse rounded-xl bg-slate-200" />
         ))}
       </div>
+
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="h-80 animate-pulse rounded-xl bg-slate-200 lg:col-span-2" />
         <div className="h-80 animate-pulse rounded-xl bg-slate-200" />
@@ -165,13 +190,15 @@ export function DashboardPage() {
     isLoading: isOrdersLoading,
     isError: isOrdersError,
   } = useOrders();
+  const { data: realtimeVisitors } = useRealtimeVisitors();
+  const { data: visitorAnalytics } = useVisitorAnalytics(period);
 
   const maxRevenue = Math.max(0, ...(analytics?.salesOverTime.map((sale) => sale.revenue) ?? []));
   const maxCategoryRevenue = Math.max(0, ...(analytics?.salesByCategory.map((category) => category.revenue) ?? []));
 
   return (
     <section>
-      <DashboardHeading />
+      <DashboardHeading liveVisitors={realtimeVisitors?.activeVisitorsNow} />
       {isAnalyticsLoading ? (
         <AnalyticsSkeleton />
       ) : isAnalyticsError || !analytics ? (
@@ -181,16 +208,28 @@ export function DashboardPage() {
         </div>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             <MetricCard title="Total Revenue" value={`$${analytics.totalRevenue.toLocaleString()}`} icon={DollarSign} />
             <MetricCard title="Total Orders" value={analytics.totalOrders.toLocaleString()} icon={ShoppingCart} />
             <MetricCard title="Total Products" value={analytics.totalProducts.toLocaleString()} icon={Package} />
             <MetricCard
+              title="Live Visitors"
+              value={(realtimeVisitors?.activeVisitorsNow ?? 42).toLocaleString()}
+              icon={Users}
+            />
+            <MetricCard
               title="Conversion Rate"
-              value={analytics.conversionRate === null ? "N/A" : `${analytics.conversionRate}%`}
+              value={
+                analytics.conversionRate !== null
+                  ? `${analytics.conversionRate}%`
+                  : visitorAnalytics?.conversionRate
+                  ? `${visitorAnalytics.conversionRate}%`
+                  : "N/A"
+              }
               icon={TrendingUp}
             />
           </div>
+
 
           <div className="mt-6 grid gap-6 lg:grid-cols-3">
             <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6 lg:col-span-2">

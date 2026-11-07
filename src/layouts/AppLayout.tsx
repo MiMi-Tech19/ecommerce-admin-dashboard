@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   BarChart3,
-  Bell,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -14,7 +13,9 @@ import {
 } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { NotificationDropdown } from "../components/notifications/NotificationDropdown";
 interface NavigationItem {
+
   label: string;
   path: string;
   icon: typeof LayoutDashboard;
@@ -259,15 +260,8 @@ export function AppLayout() {
             </div>
 
             {/* Notifications */}
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <Bell size={19} />
+            <NotificationDropdown />
 
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-            </button>
 
             {/* User */}
             <div className="flex items-center gap-3 border-l border-slate-200 pl-3 dark:border-slate-700">

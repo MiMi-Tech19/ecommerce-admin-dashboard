@@ -3,6 +3,7 @@ import type { Order, OrderStatus, Product } from "../types";
 import { dashboardAnalytics } from "./data/analytics";
 import { orders } from "./data/orders";
 import { products } from "./data/products";
+import { generateVisitorAnalytics, getMockRealtimeVisitors } from "./data/visitors";
 
 const PRODUCTS_STORAGE_KEY = "shopadmin-products";
 const currentOrders: Order[] = orders.map((order) => ({ ...order }));
@@ -231,6 +232,17 @@ export const handlers = [
   http.get("/api/analytics/dashboard", () => {
     return HttpResponse.json(dashboardAnalytics);
   }),
+
+  http.get("/api/analytics/visitors", ({ request }) => {
+    const url = new URL(request.url);
+    const period = Number(url.searchParams.get("period") || "7");
+    return HttpResponse.json(generateVisitorAnalytics(period));
+  }),
+
+  http.get("/api/analytics/visitors/realtime", () => {
+    return HttpResponse.json(getMockRealtimeVisitors());
+  }),
+
 
  http.get("/api/orders", () => {
   return HttpResponse.json(currentOrders);
