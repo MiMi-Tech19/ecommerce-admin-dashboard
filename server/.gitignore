@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+
+# Generated Prisma client
+src/generated/prisma/
+
+# AI coding tool configuration
+.agents/
+.claude/
+.windsurf/
+
+# Temporary database connection tests
+prisma-connection-test.mjs
+prisma-connection-test.ts
+prisma-prisma-test.ts
+
+# Prisma AI tooling lock file
+skills-lock.json

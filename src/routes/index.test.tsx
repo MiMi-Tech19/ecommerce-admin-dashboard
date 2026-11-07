@@ -4,6 +4,22 @@ import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider, Outlet } from 'react-router-dom';
 import { routeConfig } from './index';
 
+vi.mock('../context/AuthContext', () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: true,
+    user: {
+      id: 'user-1',
+      name: 'Test Admin',
+      email: 'admin@example.com',
+      role: 'ADMIN',
+    },
+    isInitializing: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+  })),
+}));
+
 vi.mock('../layouts/AppLayout', () => ({
   AppLayout: () => (
     <div>

@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createProduct } from '../services/products';
 import type { Product } from '../types';

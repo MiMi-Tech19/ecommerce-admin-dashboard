@@ -12,6 +12,22 @@ vi.mock("../hooks/useProducts", () => ({
   useProducts: mockUseProducts,
 }));
 
+vi.mock("../context/AuthContext", () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: true,
+    user: {
+      id: "user-1",
+      name: "Test Admin",
+      email: "admin@example.com",
+      role: "ADMIN",
+    },
+    isInitializing: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+  })),
+}));
+
 const testProducts: Product[] = [
   {
     id: "1",

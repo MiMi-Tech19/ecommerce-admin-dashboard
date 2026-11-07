@@ -14,6 +14,7 @@ export function useUpdateOrderStatus() {
   return useMutation({
     mutationFn: ({ id, status }: UpdateOrderStatusVariables) =>
       updateOrderStatus(id, status),
+
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['orders'],

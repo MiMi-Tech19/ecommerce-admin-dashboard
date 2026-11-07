@@ -1,30 +1,48 @@
-import type { Product } from "../types";
 
-const PRODUCTS_ENDPOINT = "/api/products";
+import type { Product } from '../types';
+import { apiFetch } from './api';
+
+const PRODUCTS_ENDPOINT = '/api/products';
+
+async function getErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  try {
+    const data = (await response.json()) as {
+      message?: string;
+    };
+
+    return data.message || fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export async function getProducts(): Promise<Product[]> {
-  const response = await fetch(PRODUCTS_ENDPOINT);
+  const response = await apiFetch(PRODUCTS_ENDPOINT);
 
   if (!response.ok) {
-    throw new Error("Failed to fetch products");
+    throw new Error(
+      await getErrorMessage(response, 'Failed to fetch products.'),
+    );
   }
 
   return response.json() as Promise<Product[]>;
 }
 
 export async function createProduct(
-  product: Omit<Product, "id" | "createdAt" | "updatedAt">,
+  product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<Product> {
-  const response = await fetch(PRODUCTS_ENDPOINT, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const response = await apiFetch(PRODUCTS_ENDPOINT, {
+    method: 'POST',
     body: JSON.stringify(product),
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create product");
+    throw new Error(
+      await getErrorMessage(response, 'Failed to create product.'),
+    );
   }
 
   return response.json() as Promise<Product>;
@@ -32,35 +50,36 @@ export async function createProduct(
 
 export async function updateProduct(
   id: string,
-  product: Omit<Product, "id" | "createdAt" | "updatedAt">,
+  product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
 ): Promise<Product> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${PRODUCTS_ENDPOINT}/${encodeURIComponent(id)}`,
     {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      method: 'PUT',
       body: JSON.stringify(product),
     },
   );
 
   if (!response.ok) {
-    throw new Error("Failed to update product");
+    throw new Error(
+      await getErrorMessage(response, 'Failed to update product.'),
+    );
   }
 
   return response.json() as Promise<Product>;
 }
 
 export async function deleteProduct(id: string): Promise<void> {
-  const response = await fetch(
+  const response = await apiFetch(
     `${PRODUCTS_ENDPOINT}/${encodeURIComponent(id)}`,
     {
-      method: "DELETE",
+      method: 'DELETE',
     },
   );
 
   if (!response.ok) {
-    throw new Error("Failed to delete product");
+    throw new Error(
+      await getErrorMessage(response, 'Failed to delete product.'),
+    );
   }
 }

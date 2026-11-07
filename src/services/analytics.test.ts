@@ -1,4 +1,3 @@
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getDashboardAnalytics } from './analytics';
 import type { DashboardAnalytics } from '../types';
@@ -21,7 +20,13 @@ describe('getDashboardAnalytics', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     await expect(getDashboardAnalytics()).resolves.toEqual(analytics);
-    expect(fetchMock).toHaveBeenCalledWith('/api/analytics/dashboard');
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+
+    const [url, options] = fetchMock.mock.calls[0];
+
+    expect(url).toBe('/api/analytics/dashboard?period=7');
+    expect(options.credentials).toBe('include');
   });
 
   it('throws an error when the request fails', async () => {

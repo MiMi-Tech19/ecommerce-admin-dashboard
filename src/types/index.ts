@@ -18,4 +18,12 @@ export type {
   SalesMetric,
   CategorySales,
   DashboardAnalytics,
+  VisitorMetric,
+  DeviceBreakdown,
+  TrafficSource,
+  ActivePage,
+  RealtimeVisitorStats,
+  ConversionStep,
+  VisitorAnalytics,
 } from './analytics';
+

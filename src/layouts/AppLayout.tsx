@@ -1,18 +1,21 @@
 import { useState } from "react";
 import {
   BarChart3,
-  Bell,
   LayoutDashboard,
+  LogOut,
   Menu,
+  Users,
   Package,
   Search,
   Settings,
   ShoppingCart,
   X,
 } from "lucide-react";
-import { Link, Outlet, useLocation } from "react-router-dom";
-
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { NotificationDropdown } from "../components/notifications/NotificationDropdown";
 interface NavigationItem {
+
   label: string;
   path: string;
   icon: typeof LayoutDashboard;
@@ -40,6 +43,11 @@ const navigationItems: NavigationItem[] = [
     icon: BarChart3,
   },
   {
+    label: "User Management",
+    path: "/users",
+    icon: Users,
+  },
+  {
     label: "Settings",
     path: "/settings",
     icon: Settings,
@@ -48,8 +56,21 @@ const navigationItems: NavigationItem[] = [
 
 export function AppLayout() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const visibleNavigationItems = navigationItems.filter(
+    (item) => item.path !== "/users" || user?.role === "ADMIN",
+  );
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const handleLogout = async () => {
+  try {
+    await logout();
+  } finally {
+    navigate("/login", { replace: true });
+  }
+};
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
@@ -88,7 +109,7 @@ export function AppLayout() {
           </p>
 
           <ul className="space-y-1">
-            {navigationItems.map((item) => {
+            {visibleNavigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
 
@@ -161,7 +182,7 @@ export function AppLayout() {
           </p>
 
           <ul className="space-y-1">
-            {navigationItems.map((item) => {
+            {visibleNavigationItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.path;
 
@@ -239,32 +260,41 @@ export function AppLayout() {
             </div>
 
             {/* Notifications */}
-            <button
-              type="button"
-              aria-label="Notifications"
-              className="relative rounded-lg p-2 text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <Bell size={19} />
+            <NotificationDropdown />
 
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500" />
-            </button>
 
             {/* User */}
             <div className="flex items-center gap-3 border-l border-slate-200 pl-3 dark:border-slate-700">
-              {" "}
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium text-slate-900 dark:text-white">
-                  Admin User
+                  {user?.name ?? "User"}
                 </p>
 
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {" "}
-                  Administrator
+                  {user?.email}
+                </p>
+
+                <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                  {user?.role === "ADMIN" ? "Administrator" : "Staff"}
                 </p>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white">
-                A
+
+              <div
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-sm font-semibold text-white"
+                aria-label={`${user?.name ?? "User"} profile`}
+              >
+                {user?.name?.charAt(0).toUpperCase() ?? "U"}
               </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                aria-label="Log out"
+                title="Log out"
+                className="rounded-lg p-2 text-slate-600 transition hover:bg-red-50 hover:text-red-600 dark:text-slate-300 dark:hover:bg-red-950"
+              >
+                <LogOut size={19} />
+              </button>
             </div>
           </div>
         </header>

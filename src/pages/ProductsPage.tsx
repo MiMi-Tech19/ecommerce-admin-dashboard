@@ -4,7 +4,7 @@ import { useProducts } from "../hooks/useProducts";
 import type { Product, ProductStatus } from "../types";
 import { AddProductModal } from "../components/products/AddProductModal";
 import { DeleteProductDialog } from "../components/products/DeleteProductDialog";
-
+import { useAuth } from "../context/AuthContext";
 type StatusFilter = "all" | ProductStatus;
 type CategoryFilter = "all" | string;
 
@@ -48,6 +48,8 @@ type ProductSortField = "name" | "price" | "stock" | "createdAt";
 type SortDirection = "asc" | "desc";
 
 export function ProductsPage() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
   const {
     data: products = [],
     isLoading,
@@ -205,14 +207,16 @@ export function ProductsPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setIsAddProductOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
-        >
-          <Plus size={18} />
-          Add Product
-        </button>
+        {isAdmin && (
+          <button
+            type="button"
+            onClick={() => setIsAddProductOpen(true)}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+          >
+            <Plus size={18} />
+            Add Product
+          </button>
+        )}
       </div>
 
       {/* Product Summary */}
@@ -409,23 +413,25 @@ export function ProductsPage() {
                       </p>
                     </div>
                   </div>
+                  {isAdmin && (
+                    <div className="flex gap-4 border-t border-slate-100 pt-3">
+                      <button
+                        type="button"
+                        onClick={() => setEditingProduct(product)}
+                        className="min-h-11 text-sm font-medium text-slate-700 hover:text-slate-900"
+                      >
+                        Edit
+                      </button>
 
-                  <div className="flex gap-4 border-t border-slate-100 pt-3">
-                    <button
-                      type="button"
-                      onClick={() => setEditingProduct(product)}
-                      className="min-h-11 text-sm font-medium text-slate-700 hover:text-slate-900"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDeletingProduct(product)}
-                      className="min-h-11 text-sm font-medium text-red-600 hover:text-red-700"
-                    >
-                      Delete
-                    </button>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingProduct(product)}
+                        className="min-h-11 text-sm font-medium text-red-600 hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))}
             </div>
@@ -450,9 +456,11 @@ export function ProductsPage() {
                     <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
                       Status
                     </th>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Actions
-                    </th>
+                    {isAdmin && (
+                      <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Actions
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -481,6 +489,7 @@ export function ProductsPage() {
                       <td className="px-6 py-4">
                         <StatusBadge status={product.status} />
                       </td>
+                      {isAdmin && (
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4">
                           <button
@@ -499,6 +508,7 @@ export function ProductsPage() {
                           </button>
                         </div>
                       </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
