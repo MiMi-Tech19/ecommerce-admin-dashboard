@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { useSettings } from "../context/SettingsContext";
+import { useAuth } from "../context/AuthContext";
+import { SessionManagement } from '../components/settings/SessionManagement';
 
 export function SettingsPage() {
   const { settings, dispatch } = useSettings();
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { updateProfile } = useAuth();
+
   function updateField<K extends keyof typeof settings>(
     field: K,
     value: (typeof settings)[K],
@@ -78,14 +84,35 @@ export function SettingsPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setSaved(false);
+    setSaveError("");
 
     if (!validateForm()) {
       return;
     }
 
-    setSaved(true);
+    setSaving(true);
+
+    try {
+      await updateProfile(settings.adminName.trim());
+
+      dispatch({
+        type: "UPDATE_TEXT_FIELD",
+        field: "adminName",
+        value: settings.adminName.trim(),
+      });
+
+      setSaved(true);
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : "Unable to save your profile. Please try again.",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -320,6 +347,12 @@ export function SettingsPage() {
         <div>
           <p className="text-sm font-medium text-slate-900">Settings changes</p>
 
+          {saveError && (
+            <p className="mt-1 text-sm text-red-600" role="alert">
+              {saveError}
+            </p>
+          )}
+
           {saved ? (
             <p className="mt-1 text-sm text-emerald-600">
               Settings saved successfully.
@@ -334,11 +367,14 @@ export function SettingsPage() {
         <button
           type="button"
           onClick={handleSave}
-          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+          disabled={saving}
+          className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
         >
-          Save Changes
+          {saving ? "Saving..." : "Save Changes"}
         </button>
-      </div>
+            </div>
+
+      <SessionManagement />
     </section>
   );
 }

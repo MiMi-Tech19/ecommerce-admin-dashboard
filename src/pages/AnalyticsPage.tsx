@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
 
 function formatCurrency(value: number): string {
@@ -9,20 +9,18 @@ function formatCurrency(value: number): string {
 }
 
 export function AnalyticsPage() {
-  const { data, isLoading, isError } = useDashboardAnalytics();
+  const [period, setPeriod] = useState(7);
+
+  const { data, isLoading, isError } = useDashboardAnalytics(period);
 
   const maxRevenue = useMemo(() => {
-    if (!data) {
-      return 0;
-    }
+    if (!data) return 0;
 
     return Math.max(...data.salesOverTime.map((metric) => metric.revenue), 1);
   }, [data]);
 
   const maxCategoryRevenue = useMemo(() => {
-    if (!data) {
-      return 0;
-    }
+    if (!data) return 0;
 
     return Math.max(
       ...data.salesByCategory.map((category) => category.revenue),
@@ -86,40 +84,68 @@ export function AnalyticsPage() {
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <p className="text-sm font-medium text-slate-500">Conversion Rate</p>
           <p className="mt-2 text-2xl font-bold text-slate-900">
-            {data.conversionRate}%
+            {data.conversionRate === null ? "N/A" : `${data.conversionRate}%`}
           </p>
         </div>
       </div>
 
       {/* Sales overview */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Sales Overview
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Revenue and orders over the last 7 days.
-          </p>
+        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              Sales Overview
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Revenue and orders over the last {period} days.
+            </p>
+          </div>
+
+          <select
+            aria-label="Analytics reporting period"
+            className="w-fit rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none focus:ring-2 focus:ring-slate-300"
+            value={String(period)}
+            onChange={(event) => setPeriod(Number(event.target.value))}
+          >
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
         </div>
 
-        <div className="space-y-5">
+        <div
+          className={
+            period === 7
+              ? "space-y-5"
+              : "max-h-[420px] space-y-5 overflow-y-auto overscroll-contain pr-2"
+          }
+        >
           {data.salesOverTime.map((metric) => {
             const revenuePercentage = (metric.revenue / maxRevenue) * 100;
+
+            const [year, month, day] = metric.date.split("-").map(Number);
+            const dateLabel = new Date(year, month - 1, day).toLocaleDateString(
+              "en",
+              {
+                month: "short",
+                day: "numeric",
+              },
+            );
 
             return (
               <div
                 key={metric.date}
-                className="grid grid-cols-[48px_1fr_100px] items-center gap-3"
+                className="grid grid-cols-[65px_minmax(0,1fr)_110px] items-center gap-3"
               >
                 <span className="text-sm font-medium text-slate-600">
-                  {metric.date}
+                  {dateLabel}
                 </span>
 
                 <div>
                   <div
                     className="h-8 rounded-md bg-slate-100 dark:!bg-slate-800"
                     role="img"
-                    aria-label={`${metric.date}: ${formatCurrency(
+                    aria-label={`${dateLabel}: ${formatCurrency(
                       metric.revenue,
                     )} revenue`}
                   >

@@ -3,11 +3,15 @@ import { describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('App', () => {
-  it('renders the dashboard application', () => {
+  it('redirects unauthenticated users to the login page', async () => {
     render(<App />);
 
     expect(
-      screen.getByText('Admin Dashboard'),
+      await screen.findByRole('heading', { name: 'Welcome back' }),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('button', { name: 'Sign in' }),
     ).toBeInTheDocument();
   });
 });

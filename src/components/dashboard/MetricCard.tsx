@@ -1,3 +1,4 @@
+
 import {
   ArrowDownRight,
   ArrowUpRight,
@@ -7,7 +8,7 @@ import {
 interface MetricCardProps {
   title: string;
   value: string;
-  change: string;
+  change?: string;
   positive?: boolean;
   icon: LucideIcon;
 }
@@ -35,25 +36,27 @@ export function MetricCard({
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-1 text-sm">
-        {positive ? (
-          <ArrowUpRight size={16} className="text-emerald-600" />
-        ) : (
-          <ArrowDownRight size={16} className="text-red-600" />
-        )}
+      {change && (
+        <div className="mt-4 flex items-center gap-1 text-sm">
+          {positive ? (
+            <ArrowUpRight size={16} className="text-emerald-600" />
+          ) : (
+            <ArrowDownRight size={16} className="text-red-600" />
+          )}
 
-        <span
-          className={
-            positive
-              ? 'font-medium text-emerald-600'
-              : 'font-medium text-red-600'
-          }
-        >
-          {change}
-        </span>
+          <span
+            className={
+              positive
+                ? 'font-medium text-emerald-600'
+                : 'font-medium text-red-600'
+            }
+          >
+            {change}
+          </span>
 
-        <span className="text-slate-400">vs last period</span>
-      </div>
+          <span className="text-slate-400">vs last period</span>
+        </div>
+      )}
     </article>
   );
 }
