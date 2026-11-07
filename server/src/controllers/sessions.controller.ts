@@ -1,6 +1,7 @@
 import type { Response } from 'express';
 import { prisma } from '../config/database.js';
 import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import { clearAuthCookie } from '../utils/auth-cookie.js';
 
 export async function getActiveSessions(
   req: AuthenticatedRequest,
@@ -130,6 +131,39 @@ export async function revokeSession(
     return res.status(500).json({
       success: false,
       message: 'Unable to terminate session.',
+    });
+  }
+}
+
+export async function revokeAllSessions(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
+  try {
+    const now = new Date();
+
+    const result = await prisma.userSession.updateMany({
+      where: {
+        userId: req.user!.userId,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: now,
+        loggedOutAt: now,
+      },
+    });
+
+    clearAuthCookie(res);
+
+    return res.status(200).json({
+      success: true,
+      message: 'All sessions have been terminated successfully.',
+      revokedCount: result.count,
+    });
+  } catch {
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to terminate all sessions. Please try again.',
     });
   }
 }
