@@ -58,8 +58,12 @@ function PageLoading() {
 }
 
 function ProtectedRoute() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, isInitializing, user } = useAuth();
   const location = useLocation();
+
+  if (isInitializing) {
+    return <PageLoading />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

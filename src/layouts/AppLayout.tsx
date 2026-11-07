@@ -63,10 +63,13 @@ export function AppLayout() {
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+  try {
+    await logout();
+  } finally {
     navigate("/login", { replace: true });
-  };
+  }
+};
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };

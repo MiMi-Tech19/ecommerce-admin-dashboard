@@ -1,3 +1,4 @@
+
 export type UserRole = 'ADMIN' | 'STAFF';
 
 export interface AuthUser {
@@ -15,7 +16,6 @@ export interface LoginCredentials {
 export interface LoginResponse {
   success: boolean;
   message: string;
-  token: string;
   user: AuthUser;
 }
 
@@ -28,7 +28,6 @@ export interface RegisterCredentials {
 export interface RegisterResponse {
   success: boolean;
   message: string;
-  token: string;
   user: AuthUser & {
     createdAt: string;
   };

@@ -1,3 +1,4 @@
+
 import { apiFetch } from './api';
 import type { UserRole } from '../types/auth';
 
@@ -22,10 +23,8 @@ interface UpdateUserRoleResponse {
   user: ManagedUser;
 }
 
-export async function getUsers(
-  token: string | null,
-): Promise<ManagedUser[]> {
-  const response = await apiFetch(USERS_ENDPOINT, token);
+export async function getUsers(): Promise<ManagedUser[]> {
+  const response = await apiFetch(USERS_ENDPOINT);
 
   const data = (await response.json()) as GetUsersResponse & {
     message?: string;
@@ -41,11 +40,9 @@ export async function getUsers(
 export async function updateUserRole(
   id: string,
   role: UserRole,
-  token: string | null,
 ): Promise<UpdateUserRoleResponse> {
   const response = await apiFetch(
     `${USERS_ENDPOINT}/${encodeURIComponent(id)}/role`,
-    token,
     {
       method: 'PATCH',
       body: JSON.stringify({ role }),

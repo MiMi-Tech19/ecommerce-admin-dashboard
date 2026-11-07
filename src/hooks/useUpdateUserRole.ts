@@ -1,5 +1,5 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '../context/AuthContext';
 import { updateUserRole } from '../services/users';
 import type { UserRole } from '../types/auth';
 
@@ -10,11 +10,10 @@ interface UpdateUserRoleVariables {
 
 export function useUpdateUserRole() {
   const queryClient = useQueryClient();
-  const { token } = useAuth();
 
   return useMutation({
     mutationFn: ({ id, role }: UpdateUserRoleVariables) =>
-      updateUserRole(id, role, token),
+      updateUserRole(id, role),
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({

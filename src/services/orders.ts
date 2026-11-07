@@ -4,10 +4,8 @@ import { apiFetch } from './api';
 
 const ORDERS_ENDPOINT = '/api/orders';
 
-export async function getOrders(
-  token: string | null = null,
-): Promise<Order[]> {
-  const response = await apiFetch(ORDERS_ENDPOINT, token);
+export async function getOrders(): Promise<Order[]> {
+  const response = await apiFetch(ORDERS_ENDPOINT);
 
   if (!response.ok) {
     throw new Error('Failed to fetch orders');
@@ -19,11 +17,9 @@ export async function getOrders(
 export async function updateOrderStatus(
   id: string,
   status: OrderStatus,
-  token: string | null = null,
 ): Promise<Order> {
   const response = await apiFetch(
     `${ORDERS_ENDPOINT}/${encodeURIComponent(id)}/status`,
-    token,
     {
       method: 'PATCH',
       body: JSON.stringify({ status }),

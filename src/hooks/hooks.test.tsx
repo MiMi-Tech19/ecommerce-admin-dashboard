@@ -35,6 +35,22 @@ vi.mock("../services/analytics", () => ({
   getDashboardAnalytics: vi.fn(),
 }));
 
+vi.mock("../context/AuthContext", () => ({
+  useAuth: vi.fn(() => ({
+    isAuthenticated: true,
+    user: {
+      id: "user-1",
+      name: "Test Admin",
+      email: "admin@example.com",
+      role: "ADMIN",
+    },
+    isInitializing: false,
+    login: vi.fn(),
+    register: vi.fn(),
+    logout: vi.fn(),
+  })),
+}));
+
 function createWrapper() {
   const queryClient = new QueryClient({
     defaultOptions: {

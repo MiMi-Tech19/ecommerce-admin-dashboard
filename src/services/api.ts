@@ -1,6 +1,6 @@
+
 export async function apiFetch(
   endpoint: string,
-  _token: string | null,
   options: RequestInit = {},
 ): Promise<Response> {
   const headers = new Headers(options.headers);

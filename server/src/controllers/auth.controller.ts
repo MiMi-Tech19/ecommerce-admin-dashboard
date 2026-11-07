@@ -73,7 +73,6 @@ export async function register(req: Request, res: Response) {
   return res.status(201).json({
     success: true,
     message: "Account created successfully.",
-    token,
     user,
   });
 }
@@ -89,8 +88,7 @@ export async function login(req: Request, res: Response) {
     });
   }
 
-  const { email, password } = result.data;
-
+  const { email, password, role } = result.data;
   const user = await prisma.user.findUnique({
     where: { email },
   });
@@ -108,6 +106,16 @@ export async function login(req: Request, res: Response) {
     return res.status(401).json({
       success: false,
       message: "Invalid email or password.",
+    });
+  }
+
+  if (user.role !== role) {
+    return res.status(403).json({
+      success: false,
+      message:
+        role === "ADMIN"
+          ? "You need to be promoted to be able to log in as an Admin."
+          : "Your account is Admin. Please choose Admin to log in.",
     });
   }
 
@@ -134,7 +142,6 @@ export async function login(req: Request, res: Response) {
   return res.status(200).json({
     success: true,
     message: "Login successful.",
-    token,
     user: {
       id: user.id,
       name: user.name,
@@ -144,12 +151,9 @@ export async function login(req: Request, res: Response) {
   });
 }
 
-import type { AuthenticatedRequest } from '../middleware/auth.middleware.js';
+import type { AuthenticatedRequest } from "../middleware/auth.middleware.js";
 
-export async function getCurrentUser(
-  req: AuthenticatedRequest,
-  res: Response,
-) {
+export async function getCurrentUser(req: AuthenticatedRequest, res: Response) {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user!.userId },
@@ -165,7 +169,7 @@ export async function getCurrentUser(
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'User account not found.',
+        message: "User account not found.",
       });
     }
 
@@ -176,7 +180,7 @@ export async function getCurrentUser(
   } catch {
     return res.status(500).json({
       success: false,
-      message: 'Unable to retrieve current user.',
+      message: "Unable to retrieve current user.",
     });
   }
 }
@@ -186,6 +190,6 @@ export function logout(_req: Request, res: Response) {
 
   return res.status(200).json({
     success: true,
-    message: 'Logged out successfully.',
+    message: "Logged out successfully.",
   });
 }

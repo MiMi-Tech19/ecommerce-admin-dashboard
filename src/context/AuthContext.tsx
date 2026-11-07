@@ -1,10 +1,19 @@
+
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from 'react';
-import { loginUser, registerUser } from '../services/auth';
+
+import {
+  loginUser,
+  registerUser,
+  getCurrentUser,
+  logoutUser,
+} from '../services/auth';
+
 import type {
   AuthUser,
   LoginCredentials,
@@ -14,14 +23,14 @@ import type {
 
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
+  isInitializing: boolean;
   login: (
     credentials: LoginCredentials,
     selectedRole: UserRole,
   ) => Promise<void>;
   register: (credentials: RegisterCredentials) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,47 +41,50 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  async function login(
-    credentials: LoginCredentials,
-    selectedRole: UserRole,
-  ): Promise<void> {
-    const response = await loginUser(credentials);
-
-    if (response.user.role !== selectedRole) {
-      if (selectedRole === 'ADMIN' && response.user.role === 'STAFF') {
-        throw new Error(
-          'You need to be promoted to be able to log in as an Admin.',
-        );
-      }
-
-      if (selectedRole === 'STAFF' && response.user.role === 'ADMIN') {
-        throw new Error('Your account is Admin. Please choose Admin to log in.');
+  useEffect(() => {
+    async function restoreSession() {
+      try {
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsInitializing(false);
       }
     }
 
-    setUser(response.user);
-    setToken(response.token);
-  }
+    void restoreSession();
+  }, []);
+async function login(
+  credentials: LoginCredentials,
+  selectedRole: UserRole,
+): Promise<void> {
+  const response = await loginUser(credentials, selectedRole);
+  setUser(response.user);
+}
+
 
   async function register(credentials: RegisterCredentials): Promise<void> {
     const response = await registerUser(credentials);
     setUser(response.user);
-    setToken(response.token);
   }
 
-  function logout(): void {
-    setUser(null);
-    setToken(null);
+  async function logout(): Promise<void> {
+    try {
+      await logoutUser();
+    } finally {
+      setUser(null);
+    }
   }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
-        isAuthenticated: Boolean(user && token),
+        isAuthenticated: Boolean(user),
+        isInitializing,
         login,
         register,
         logout,

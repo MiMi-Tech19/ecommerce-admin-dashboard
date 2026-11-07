@@ -19,10 +19,8 @@ async function getErrorMessage(
   }
 }
 
-export async function getProducts(
-  token: string | null = null,
-): Promise<Product[]> {
-  const response = await apiFetch(PRODUCTS_ENDPOINT, token);
+export async function getProducts(): Promise<Product[]> {
+  const response = await apiFetch(PRODUCTS_ENDPOINT);
 
   if (!response.ok) {
     throw new Error(
@@ -35,9 +33,8 @@ export async function getProducts(
 
 export async function createProduct(
   product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
-  token: string | null = null,
 ): Promise<Product> {
-  const response = await apiFetch(PRODUCTS_ENDPOINT, token, {
+  const response = await apiFetch(PRODUCTS_ENDPOINT, {
     method: 'POST',
     body: JSON.stringify(product),
   });
@@ -54,11 +51,9 @@ export async function createProduct(
 export async function updateProduct(
   id: string,
   product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>,
-  token: string | null = null,
 ): Promise<Product> {
   const response = await apiFetch(
     `${PRODUCTS_ENDPOINT}/${encodeURIComponent(id)}`,
-    token,
     {
       method: 'PUT',
       body: JSON.stringify(product),
@@ -74,13 +69,9 @@ export async function updateProduct(
   return response.json() as Promise<Product>;
 }
 
-export async function deleteProduct(
-  id: string,
-  token: string | null = null,
-): Promise<void> {
+export async function deleteProduct(id: string): Promise<void> {
   const response = await apiFetch(
     `${PRODUCTS_ENDPOINT}/${encodeURIComponent(id)}`,
-    token,
     {
       method: 'DELETE',
     },

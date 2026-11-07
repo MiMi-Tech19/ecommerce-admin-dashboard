@@ -1,13 +1,13 @@
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '../context/AuthContext';
-import { getUsers } from '../services/users';
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../context/AuthContext";
+import { getUsers } from "../services/users";
 
 export function useUsers() {
-  const { token, user } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   return useQuery({
-    queryKey: ['users'],
-    queryFn: () => getUsers(token),
-    enabled: Boolean(token && user?.role === 'ADMIN'),
+    queryKey: ["users"],
+    queryFn: () => getUsers(),
+    enabled: isAuthenticated && user?.role === "ADMIN",
   });
 }
