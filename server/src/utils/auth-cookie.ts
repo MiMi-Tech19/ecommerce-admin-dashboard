@@ -1,11 +1,14 @@
+
 import type { Response } from 'express';
 
 const COOKIE_NAME = 'authToken';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  secure: isProduction,
+  sameSite: isProduction ? ('none' as const) : ('lax' as const),
   path: '/',
 };
 
