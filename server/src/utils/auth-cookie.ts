@@ -1,15 +1,14 @@
+import type { Response } from "express";
 
-import type { Response } from 'express';
+const COOKIE_NAME = "authToken";
 
-const COOKIE_NAME = 'authToken';
-
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === "production";
 
 const cookieOptions = {
   httpOnly: true,
   secure: isProduction,
-  sameSite: isProduction ? ('none' as const) : ('lax' as const),
-  path: '/',
+  sameSite: "lax" as const,
+  path: "/",
 };
 
 export function setAuthCookie(res: Response, token: string) {

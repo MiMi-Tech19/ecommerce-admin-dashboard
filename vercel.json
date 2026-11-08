@@ -16,7 +16,11 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!assets/|mockServiceWorker.js|favicon.svg|robots.txt).*)",
+      "source": "/api/:path*",
+      "destination": "https://ecommerce-admin-api-8nw6.onrender.com/api/:path*"
+    },
+    {
+      "source": "/((?!assets/|api/|mockServiceWorker.js|ecommerce-cart.svg|robots.txt).*)",
       "destination": "/index.html"
     }
   ]
